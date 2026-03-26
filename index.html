@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -343,6 +342,40 @@
             </div>
         </div>
 
+        <!-- قسم السحب الجديد -->
+        <div id="screen-withdraw" class="screen">
+            <div class="card" style="text-align: center; padding: 30px 20px;">
+                <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح للسحب</div>
+                <div style="font-size: 40px; font-weight: 800; color: var(--accent-cyan);"><span id="withdraw-balance">0.00</span> <span style="font-size: 16px;">EGP</span></div>
+            </div>
+
+            <div class="section-title" style="margin-top: 20px; margin-bottom: 10px;">سحب رصيد</div>
+            <input type="number" id="withdraw_amount" min="1" step="any" class="input-box" placeholder="أدخل المبلغ المراد سحبه...">
+
+            <div class="grid-options" style="margin-bottom: 15px;">
+                <div class="option-box active" id="btn-withdraw-vfcash" onclick="setWithdrawMethod('vfcash')">فودافون كاش</div>
+                <div class="option-box" id="btn-withdraw-binance" onclick="setWithdrawMethod('binance')">بينانس</div>
+                <div class="option-box" id="btn-withdraw-ton" onclick="setWithdrawMethod('ton')">عملة التون</div>
+            </div>
+
+            <div id="withdraw_vfcash" style="display: block;">
+                <input type="tel" id="withdraw_phone" class="input-box" placeholder="رقم فودافون كاش لاستلام السحب">
+                <div id="withdraw_vfcash_amount" style="font-size: 14px; color: var(--text-muted); margin-top: 5px; text-align: center;"></div>
+            </div>
+
+            <div id="withdraw_binance" style="display: none;">
+                <input type="text" id="withdraw_binance_id" class="input-box" placeholder="ID حساب بينانس لاستلام السحب">
+                <div id="withdraw_binance_amount" style="font-size: 14px; color: var(--text-muted); margin-top: 5px; text-align: center;"></div>
+            </div>
+
+            <div id="withdraw_ton" style="display: none;">
+                <input type="text" id="withdraw_ton_wallet" class="input-box" placeholder="عنوان محفظة تون كيبر لاستلام السحب">
+                <div id="withdraw_ton_amount" style="font-size: 14px; color: var(--text-muted); margin-top: 5px; text-align: center;"></div>
+            </div>
+
+            <button class="btn-primary" onclick="submitWithdraw()">تأكيد طلب السحب</button>
+        </div>
+
         <div id="screen-ads" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-bullhorn"></i></div>
@@ -444,6 +477,22 @@
             </div>
 
             <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-user-shield"></i></div>
+                <div class="section-title">إدارة المشرفين</div>
+            </div>
+            <div class="card">
+                <p style="font-size:12px; color:var(--text-muted); margin-top:0;">أدخل ID المشرفين لكل يوم (سيتم إرسال طلبات السحب لهم):</p>
+                <div class="day-row"><div class="day-label">السبت</div><input type="text" id="admin_sat_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="admin_sat_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الأحد</div><input type="text" id="admin_sun_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="admin_sun_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الإثنين</div><input type="text" id="admin_mon_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="admin_mon_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الثلاثاء</div><input type="text" id="admin_tue_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="admin_tue_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الأربعاء</div><input type="text" id="admin_wed_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="admin_wed_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الخميس</div><input type="text" id="admin_thu_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="admin_thu_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الجمعة</div><input type="text" id="admin_fri_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="admin_fri_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <button class="btn-primary" style="margin-top: 15px;" onclick="saveAdmins()">حفظ المشرفين</button>
+            </div>
+
+            <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-gift"></i></div>
                 <div class="section-title">إنشاء كود هدية مجاني</div>
             </div>
@@ -488,6 +537,9 @@
         <div class="nav-item" id="nav-topup" onclick="switchTab('topup')">
             <i class="fa-solid fa-wallet"></i> شحن رصيد
         </div>
+        <div class="nav-item" id="nav-withdraw" onclick="switchTab('withdraw')">
+            <i class="fa-solid fa-money-bill-transfer"></i> سحب رصيد
+        </div>
         <div class="nav-item" id="nav-ads" onclick="switchTab('ads')">
             <i class="fa-solid fa-plus-square"></i> إعلان
         </div>
@@ -503,6 +555,10 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
         let globalUserId = "";
+        let currentWithdrawMethod = 'vfcash';
+        let usdtRate = 0;
+        let tonRate = 0;
+        
         try {
             let userLang = (tg.initDataUnsafe?.user?.language_code) || navigator.language || 'ar';
             let currentSearch = window.location.search; 
@@ -532,13 +588,11 @@
             }
 
             if (container) container.innerHTML = badgeHTML;
-            // إضافة كلاس no-margin عشان تلغي المسافة اللي كانت بتبوظ السنترة في صفحة نشاطي
             if (activityBadgeContainer) activityBadgeContainer.innerHTML = badgeHTML.replace('class="badge ', 'class="badge no-margin ');
             if (activityCount) activityCount.innerText = count;
         }
 
-        // 🌟 دالة رسم الإعلانات ديناميكياً من البايثون 🌟
-        // 🌟 دالة رسم الإعلانات ديناميكياً مع التاريخ والوقت 🌟
+        // دالة رسم الإعلانات ديناميكياً مع التاريخ والوقت
         function renderAdHistory(historyArray) {
             const container = document.getElementById('content-ads');
             if (!historyArray || historyArray.length === 0) {
@@ -556,10 +610,8 @@
                 let adName = isPromo ? "إعلان ترويجي ✨" : "إعلان عادي ⚡";
                 let adColor = isPromo ? "var(--success)" : "var(--text-muted)";
                 
-                // 🌟 معالجة التاريخ والوقت 🌟
-                let dateStr = "إعلان قديم"; // الافتراضي للإعلانات اللي اتعملت قبل التحديث ده
+                let dateStr = "إعلان قديم";
                 if (ad.date) {
-                    // تحويل صيغة قاعدة البيانات لتوقيت محلي مقروء للمستخدم
                     let d = new Date(ad.date.replace(' ', 'T') + 'Z');
                     if (!isNaN(d)) {
                         dateStr = d.toLocaleDateString('ar-EG', { 
@@ -582,6 +634,11 @@
                     </div>`;
             });
             container.innerHTML = html;
+        }
+
+        // دالة عرض طلبات السحب للمستخدم
+        function renderWithdrawHistory(historyArray) {
+            // يمكن إضافة عرض تاريخ السحوبات هنا إذا رغبت
         }
 
         const promoAds = [
@@ -658,12 +715,114 @@
             tg.close();
         }
 
+        // دالة حساب المبلغ المحول حسب العملة
+        function calculateConvertedAmount(amountEGP, method) {
+            if (method === 'binance' && usdtRate > 0) {
+                return (amountEGP / usdtRate).toFixed(2);
+            } else if (method === 'ton' && tonRate > 0) {
+                return (amountEGP / tonRate).toFixed(4);
+            }
+            return amountEGP;
+        }
+
+        // تحديث عرض المبلغ المحول
+        function updateWithdrawAmountDisplay() {
+            let amountEGP = parseFloat(document.getElementById('withdraw_amount').value) || 0;
+            
+            if (currentWithdrawMethod === 'binance') {
+                let usdtAmount = calculateConvertedAmount(amountEGP, 'binance');
+                document.getElementById('withdraw_binance_amount').innerHTML = `<i class="fa-solid fa-dollar-sign"></i> المبلغ المستلم: ${usdtAmount} USDT`;
+                document.getElementById('withdraw_vfcash_amount').innerHTML = '';
+                document.getElementById('withdraw_ton_amount').innerHTML = '';
+            } else if (currentWithdrawMethod === 'ton') {
+                let tonAmount = calculateConvertedAmount(amountEGP, 'ton');
+                document.getElementById('withdraw_ton_amount').innerHTML = `<i class="fa-solid fa-coins"></i> المبلغ المستلم: ${tonAmount} TON`;
+                document.getElementById('withdraw_binance_amount').innerHTML = '';
+                document.getElementById('withdraw_vfcash_amount').innerHTML = '';
+            } else {
+                document.getElementById('withdraw_vfcash_amount').innerHTML = `<i class="fa-solid fa-pound-sign"></i> المبلغ المستلم: ${amountEGP.toFixed(2)} EGP`;
+                document.getElementById('withdraw_binance_amount').innerHTML = '';
+                document.getElementById('withdraw_ton_amount').innerHTML = '';
+            }
+        }
+
+        // دالة تحديد طريقة السحب
+        function setWithdrawMethod(method) {
+            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+            currentWithdrawMethod = method;
+            document.getElementById('btn-withdraw-vfcash').classList.remove('active');
+            document.getElementById('btn-withdraw-binance').classList.remove('active');
+            document.getElementById('btn-withdraw-ton').classList.remove('active');
+            document.getElementById(`btn-withdraw-${method}`).classList.add('active');
+            
+            document.getElementById('withdraw_vfcash').style.display = method === 'vfcash' ? 'block' : 'none';
+            document.getElementById('withdraw_binance').style.display = method === 'binance' ? 'block' : 'none';
+            document.getElementById('withdraw_ton').style.display = method === 'ton' ? 'block' : 'none';
+            
+            updateWithdrawAmountDisplay();
+        }
+
+        // دالة تقديم طلب السحب
+        function submitWithdraw() {
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+            
+            let amount = document.getElementById("withdraw_amount").value;
+            let recipient = "";
+            
+            if (currentWithdrawMethod === "vfcash") {
+                recipient = document.getElementById("withdraw_phone").value;
+                if (!recipient) {
+                    tg.showAlert("⚠️ يرجى إدخال رقم فودافون كاش!");
+                    return;
+                }
+                if (!recipient.match(/^01[0-9]{9}$/)) {
+                    tg.showAlert("⚠️ يرجى إدخال رقم موبايل مصري صحيح!");
+                    return;
+                }
+            } else if (currentWithdrawMethod === "binance") {
+                recipient = document.getElementById("withdraw_binance_id").value;
+                if (!recipient) {
+                    tg.showAlert("⚠️ يرجى إدخال ID حساب بينانس!");
+                    return;
+                }
+            } else if (currentWithdrawMethod === "ton") {
+                recipient = document.getElementById("withdraw_ton_wallet").value;
+                if (!recipient) {
+                    tg.showAlert("⚠️ يرجى إدخال عنوان محفظة تون كيبر!");
+                    return;
+                }
+            }
+
+            if (!amount || parseFloat(amount) <= 0) {
+                tg.showAlert("⚠️ يرجى إدخال مبلغ صحيح للسحب!");
+                return;
+            }
+            
+            let balance = parseFloat(document.getElementById('user-balance').innerText.replace(/,/g, ''));
+            if (parseFloat(amount) > balance) {
+                tg.showAlert("⚠️ الرصيد غير كافٍ لإتمام عملية السحب!");
+                return;
+            }
+            
+            // إرسال طلب السحب للبوت
+            tg.sendData(JSON.stringify({ 
+                action: "withdraw", 
+                amount: amount, 
+                method: currentWithdrawMethod, 
+                recipient: recipient,
+                converted_amount: calculateConvertedAmount(parseFloat(amount), currentWithdrawMethod)
+            }));
+            
+            tg.close();
+        }
+
         function initProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             globalUserId = tg.initDataUnsafe?.user?.id || urlParams.get('user_id');
             const rawBalance = urlParams.get('balance') || '0';
             const userBalance = parseFloat(rawBalance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
             document.getElementById('user-balance').innerText = userBalance;
+            document.getElementById('withdraw-balance').innerText = userBalance;
 
             let urlName = urlParams.get('name');
             let urlUser = urlParams.get('username');
@@ -672,7 +831,17 @@
             let realUsers = urlParams.get('stats_users');
             let realAds = urlParams.get('stats_ads');
             let userAds = urlParams.get('user_ads') || '0';
-            let urlHistory = urlParams.get('history'); // 🌟 استقبال السجل
+            let urlHistory = urlParams.get('history');
+            
+            // جلب أسعار العملات من البوت
+            let rates = urlParams.get('rates');
+            if (rates) {
+                try {
+                    let parsedRates = JSON.parse(decodeURIComponent(rates));
+                    usdtRate = parsedRates.usdt || 0;
+                    tonRate = parsedRates.ton || 0;
+                } catch(e) {}
+            }
 
             if (tg.colorScheme === 'light') {
                 document.documentElement.setAttribute('data-theme', 'light');
@@ -720,10 +889,21 @@
                     }
                 } catch(e) {}
             }
+            
+            // جلب بيانات المشرفين
+            let urlAdmins = urlParams.get('admins');
+            if (urlAdmins) {
+                try {
+                    let parsedAdmins = JSON.parse(decodeURIComponent(urlAdmins));
+                    for (let day in parsedAdmins) {
+                        if(document.getElementById(`admin_${day}_1`)) document.getElementById(`admin_${day}_1`).value = parsedAdmins[day][0];
+                        if(document.getElementById(`admin_${day}_2`)) document.getElementById(`admin_${day}_2`).value = parsedAdmins[day][1];
+                    }
+                } catch(e) {}
+            }
 
             updateUserRank(userAds);
             
-
             if (urlHistory && urlHistory !== 'None') {
                 try {
                     let parsedHistory = JSON.parse(decodeURIComponent(urlHistory));
@@ -733,8 +913,6 @@
                 renderAdHistory([]);
             }
 
-
-            // ✨ الجزء الجديد: جلب الـ ID وعرضه ككود ميمو لشحن التون ✨
             if (globalUserId) {
                 if (document.getElementById('user-memo-display')) {
                     document.getElementById('user-memo-display').innerText = globalUserId;
@@ -746,19 +924,20 @@
             }
 
             if (!urlName) document.getElementById('display-name').innerText = "مستخدم سوبر تون";
+            
+            // إضافة مستمع لتحديث المبلغ المحول عند تغيير المبلغ
+            document.getElementById('withdraw_amount').addEventListener('input', updateWithdrawAmountDisplay);
         }
 
         function submitTopup() {
             let amount = document.getElementById("topup_amount").value;
             let sender = "";
             
-            // تحديد مصدر البيانات بناءً على طريقة الدفع
             if (currentPayment === "vfcash") {
                 sender = document.getElementById("sender_phone").value;
             } else if (currentPayment === "binance") {
                 sender = document.getElementById("sender_binance").value;
             } else if (currentPayment === "ton") {
-                // استخدام المتغير العام المضمون
                 if (globalUserId) {
                     sender = globalUserId.toString();
                 }
@@ -779,7 +958,6 @@
                 return;
             }
             
-            // إرسال البيانات الموحدة للبوت
             tg.sendData(JSON.stringify({ 
                 action: "topup", 
                 amount: amount, 
@@ -796,6 +974,13 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(`screen-${tab}`).classList.add('active');
             document.getElementById(`nav-${tab}`).classList.add('active');
+            
+            // تحديث الرصيد المعروض في صفحة السحب عند الدخول إليها
+            if (tab === 'withdraw') {
+                let balance = document.getElementById('user-balance').innerText;
+                document.getElementById('withdraw-balance').innerText = balance;
+                updateWithdrawAmountDisplay();
+            }
         }
 
         function switchActivityTab(tab) {
@@ -861,7 +1046,6 @@
             } else { tg.showAlert("❌ متصفحك لا يدعم النسخ التلقائي."); }
         }
 
-
         let tapCount = 0; let tapTimer;
         function secretAdminTap() {
             tapCount++; clearTimeout(tapTimer);
@@ -890,6 +1074,16 @@
             });
             tg.sendData(JSON.stringify({ action: "admin_save_mediators", data: mediatorsData }));
             tg.showAlert("تم إرسال بيانات الوسطاء للحفظ بنجاح!"); tg.close();
+        }
+        
+        function saveAdmins() {
+            let days = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri']; let adminsData = {};
+            days.forEach(day => {
+                let a1 = document.getElementById(`admin_${day}_1`).value; let a2 = document.getElementById(`admin_${day}_2`).value;
+                adminsData[day] = [a1, a2];
+            });
+            tg.sendData(JSON.stringify({ action: "admin_save_admins", data: adminsData }));
+            tg.showAlert("تم إرسال بيانات المشرفين للحفظ بنجاح!"); tg.close();
         }
 
         function setUserLimit(limitNumber) {
