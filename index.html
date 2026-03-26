@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -170,6 +169,13 @@
             font-family: inherit; cursor: pointer; margin-top: 10px; transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .btn-primary:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(0,230,255,0.4); }
+
+        .btn-withdraw {
+            width: 100%; background: linear-gradient(90deg, #FF9500, #FF3B30); color: #fff;
+            border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800;
+            font-family: inherit; cursor: pointer; margin-top: 10px; transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-withdraw:active { transform: scale(0.97); box-shadow: 0 0 15px rgba(255,59,48,0.4); }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 999; justify-content: center; align-items: center; animation: fadeIn 0.2s; }
         .modal-content { background: var(--bg-card); padding: 25px; border-radius: 20px; border: 1px solid var(--accent-cyan); width: 80%; max-width: 300px; text-align: center; box-shadow: 0 0 30px rgba(0,230,255,0.2); }
@@ -343,6 +349,41 @@
             </div>
         </div>
 
+        <!-- قسم سحب رصيد جديد -->
+        <div id="screen-withdraw" class="screen">
+            <div class="card" style="text-align: center; padding: 30px 20px;">
+                <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح للسحب</div>
+                <div style="font-size: 40px; font-weight: 800; color: var(--accent-cyan);"><span id="withdraw-balance">0.00</span> <span style="font-size: 16px;">EGP</span></div>
+            </div>
+
+            <div class="section-title" style="margin-top: 20px; margin-bottom: 10px;">طلب سحب رصيد</div>
+            
+            <div class="grid-options" style="margin-bottom: 15px;">
+                <div class="option-box active" id="withdraw-btn-vfcash" onclick="setWithdrawMethod('vfcash')">فودافون كاش</div>
+                <div class="option-box" id="withdraw-btn-binance" onclick="setWithdrawMethod('binance')">بينانس</div>
+                <div class="option-box" id="withdraw-btn-ton" onclick="setWithdrawMethod('ton')">تون كيبر</div>
+            </div>
+
+            <div id="withdraw_vfcash" style="display: block;">
+                <input type="tel" id="withdraw_phone" class="input-box" placeholder="رقم فودافون كاش المراد السحب إليه">
+                <input type="number" id="withdraw_amount_vfcash" min="1" step="any" class="input-box" placeholder="المبلغ المراد سحبه (بالجنيه)">
+            </div>
+
+            <div id="withdraw_binance" style="display: none;">
+                <input type="text" id="withdraw_binance_id" class="input-box" placeholder="ايدي بينانس الخاص بك">
+                <input type="number" id="withdraw_amount_binance" min="1" step="any" class="input-box" placeholder="المبلغ المراد سحبه (بالجنيه)">
+            </div>
+
+            <div id="withdraw_ton" style="display: none;">
+                <input type="text" id="withdraw_ton_address" class="input-box" placeholder="عنوان محفظة تون كيبر">
+                <input type="number" id="withdraw_amount_ton" min="1" step="any" class="input-box" placeholder="المبلغ المراد سحبه (بالجنيه)">
+            </div>
+
+            <button class="btn-withdraw" onclick="submitWithdraw()">
+                <i class="fa-solid fa-money-bill-transfer"></i> تأكيد طلب السحب
+            </button>
+        </div>
+
         <div id="screen-ads" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-bullhorn"></i></div>
@@ -429,18 +470,18 @@
 <div id="screen-admin" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-calendar-days"></i></div>
-                <div class="section-title">إدارة وسطاء الأيام</div>
+                <div class="section-title">إدارة المشرفين للأيام</div>
             </div>
             <div class="card">
-                <p style="font-size:12px; color:var(--text-muted); margin-top:0;">أدخل ID الوسطاء لكل يوم (يمكن ترك الحقل فارغاً):</p>
-                <div class="day-row"><div class="day-label">السبت</div><input type="text" id="med_sat_1" class="day-input" placeholder="ID وسيط 1"><input type="text" id="med_sat_2" class="day-input" placeholder="ID وسيط 2"></div>
-                <div class="day-row"><div class="day-label">الأحد</div><input type="text" id="med_sun_1" class="day-input" placeholder="ID وسيط 1"><input type="text" id="med_sun_2" class="day-input" placeholder="ID وسيط 2"></div>
-                <div class="day-row"><div class="day-label">الإثنين</div><input type="text" id="med_mon_1" class="day-input" placeholder="ID وسيط 1"><input type="text" id="med_mon_2" class="day-input" placeholder="ID وسيط 2"></div>
-                <div class="day-row"><div class="day-label">الثلاثاء</div><input type="text" id="med_tue_1" class="day-input" placeholder="ID وسيط 1"><input type="text" id="med_tue_2" class="day-input" placeholder="ID وسيط 2"></div>
-                <div class="day-row"><div class="day-label">الأربعاء</div><input type="text" id="med_wed_1" class="day-input" placeholder="ID وسيط 1"><input type="text" id="med_wed_2" class="day-input" placeholder="ID وسيط 2"></div>
-                <div class="day-row"><div class="day-label">الخميس</div><input type="text" id="med_thu_1" class="day-input" placeholder="ID وسيط 1"><input type="text" id="med_thu_2" class="day-input" placeholder="ID وسيط 2"></div>
-                <div class="day-row"><div class="day-label">الجمعة</div><input type="text" id="med_fri_1" class="day-input" placeholder="ID وسيط 1"><input type="text" id="med_fri_2" class="day-input" placeholder="ID وسيط 2"></div>
-                <button class="btn-primary" style="margin-top: 15px;" onclick="saveMediators()">حفظ الوسطاء</button>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:0;">أدخل ID المشرفين لكل يوم (يمكن ترك الحقل فارغاً):</p>
+                <div class="day-row"><div class="day-label">السبت</div><input type="text" id="med_sat_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="med_sat_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الأحد</div><input type="text" id="med_sun_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="med_sun_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الإثنين</div><input type="text" id="med_mon_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="med_mon_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الثلاثاء</div><input type="text" id="med_tue_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="med_tue_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الأربعاء</div><input type="text" id="med_wed_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="med_wed_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الخميس</div><input type="text" id="med_thu_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="med_thu_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <div class="day-row"><div class="day-label">الجمعة</div><input type="text" id="med_fri_1" class="day-input" placeholder="ID مشرف 1"><input type="text" id="med_fri_2" class="day-input" placeholder="ID مشرف 2"></div>
+                <button class="btn-primary" style="margin-top: 15px;" onclick="saveMediators()">حفظ المشرفين</button>
             </div>
 
             <div class="section-header">
@@ -488,6 +529,9 @@
         <div class="nav-item" id="nav-topup" onclick="switchTab('topup')">
             <i class="fa-solid fa-wallet"></i> شحن رصيد
         </div>
+        <div class="nav-item" id="nav-withdraw" onclick="switchTab('withdraw')">
+            <i class="fa-solid fa-money-bill-transfer"></i> سحب رصيد
+        </div>
         <div class="nav-item" id="nav-ads" onclick="switchTab('ads')">
             <i class="fa-solid fa-plus-square"></i> إعلان
         </div>
@@ -503,6 +547,9 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
         let globalUserId = "";
+        let currentWithdrawMethod = 'vfcash';
+        let currentBalance = 0;
+        
         try {
             let userLang = (tg.initDataUnsafe?.user?.language_code) || navigator.language || 'ar';
             let currentSearch = window.location.search; 
@@ -532,13 +579,10 @@
             }
 
             if (container) container.innerHTML = badgeHTML;
-            // إضافة كلاس no-margin عشان تلغي المسافة اللي كانت بتبوظ السنترة في صفحة نشاطي
             if (activityBadgeContainer) activityBadgeContainer.innerHTML = badgeHTML.replace('class="badge ', 'class="badge no-margin ');
             if (activityCount) activityCount.innerText = count;
         }
 
-        // 🌟 دالة رسم الإعلانات ديناميكياً من البايثون 🌟
-        // 🌟 دالة رسم الإعلانات ديناميكياً مع التاريخ والوقت 🌟
         function renderAdHistory(historyArray) {
             const container = document.getElementById('content-ads');
             if (!historyArray || historyArray.length === 0) {
@@ -556,10 +600,8 @@
                 let adName = isPromo ? "إعلان ترويجي ✨" : "إعلان عادي ⚡";
                 let adColor = isPromo ? "var(--success)" : "var(--text-muted)";
                 
-                // 🌟 معالجة التاريخ والوقت 🌟
-                let dateStr = "إعلان قديم"; // الافتراضي للإعلانات اللي اتعملت قبل التحديث ده
+                let dateStr = "إعلان قديم";
                 if (ad.date) {
-                    // تحويل صيغة قاعدة البيانات لتوقيت محلي مقروء للمستخدم
                     let d = new Date(ad.date.replace(' ', 'T') + 'Z');
                     if (!isNaN(d)) {
                         dateStr = d.toLocaleDateString('ar-EG', { 
@@ -658,12 +700,76 @@
             tg.close();
         }
 
+        function setWithdrawMethod(method) {
+            if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+            currentWithdrawMethod = method;
+            document.getElementById('withdraw-btn-vfcash').classList.remove('active');
+            document.getElementById('withdraw-btn-binance').classList.remove('active');
+            document.getElementById('withdraw-btn-ton').classList.remove('active');
+            document.getElementById(`withdraw-btn-${method}`).classList.add('active');
+            
+            document.getElementById('withdraw_vfcash').style.display = method === 'vfcash' ? 'block' : 'none';
+            document.getElementById('withdraw_binance').style.display = method === 'binance' ? 'block' : 'none';
+            document.getElementById('withdraw_ton').style.display = method === 'ton' ? 'block' : 'none';
+        }
+
+        function submitWithdraw() {
+            let amount = 0;
+            let receiver = "";
+            
+            if (currentWithdrawMethod === "vfcash") {
+                receiver = document.getElementById("withdraw_phone").value;
+                amount = document.getElementById("withdraw_amount_vfcash").value;
+                if (!receiver) {
+                    tg.showAlert("⚠️ يرجى إدخال رقم فودافون كاش!");
+                    return;
+                }
+            } else if (currentWithdrawMethod === "binance") {
+                receiver = document.getElementById("withdraw_binance_id").value;
+                amount = document.getElementById("withdraw_amount_binance").value;
+                if (!receiver) {
+                    tg.showAlert("⚠️ يرجى إدخال ايدي بينانس!");
+                    return;
+                }
+            } else if (currentWithdrawMethod === "ton") {
+                receiver = document.getElementById("withdraw_ton_address").value;
+                amount = document.getElementById("withdraw_amount_ton").value;
+                if (!receiver) {
+                    tg.showAlert("⚠️ يرجى إدخال عنوان محفظة تون كيبر!");
+                    return;
+                }
+            }
+
+            if (!amount || parseFloat(amount) <= 0) {
+                tg.showAlert("⚠️ يرجى إدخال مبلغ صحيح أكبر من صفر!");
+                return;
+            }
+
+            if (parseFloat(amount) > currentBalance) {
+                tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalance} EGP لا يكفي للسحب!`);
+                return;
+            }
+
+            tg.sendData(JSON.stringify({ 
+                action: "withdraw", 
+                amount: parseFloat(amount), 
+                method: currentWithdrawMethod, 
+                receiver: receiver,
+                user_id: globalUserId
+            }));
+            
+            tg.showAlert(`✅ تم خصم ${amount} EGP من رصيدك وارسال طلب السحب للمشرفين`);
+            tg.close();
+        }
+
         function initProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             globalUserId = tg.initDataUnsafe?.user?.id || urlParams.get('user_id');
             const rawBalance = urlParams.get('balance') || '0';
-            const userBalance = parseFloat(rawBalance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
+            currentBalance = parseFloat(rawBalance);
+            const userBalance = currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
             document.getElementById('user-balance').innerText = userBalance;
+            document.getElementById('withdraw-balance').innerText = userBalance;
 
             let urlName = urlParams.get('name');
             let urlUser = urlParams.get('username');
@@ -672,7 +778,7 @@
             let realUsers = urlParams.get('stats_users');
             let realAds = urlParams.get('stats_ads');
             let userAds = urlParams.get('user_ads') || '0';
-            let urlHistory = urlParams.get('history'); // 🌟 استقبال السجل
+            let urlHistory = urlParams.get('history');
 
             if (tg.colorScheme === 'light') {
                 document.documentElement.setAttribute('data-theme', 'light');
@@ -733,8 +839,6 @@
                 renderAdHistory([]);
             }
 
-
-            // ✨ الجزء الجديد: جلب الـ ID وعرضه ككود ميمو لشحن التون ✨
             if (globalUserId) {
                 if (document.getElementById('user-memo-display')) {
                     document.getElementById('user-memo-display').innerText = globalUserId;
@@ -752,13 +856,11 @@
             let amount = document.getElementById("topup_amount").value;
             let sender = "";
             
-            // تحديد مصدر البيانات بناءً على طريقة الدفع
             if (currentPayment === "vfcash") {
                 sender = document.getElementById("sender_phone").value;
             } else if (currentPayment === "binance") {
                 sender = document.getElementById("sender_binance").value;
             } else if (currentPayment === "ton") {
-                // استخدام المتغير العام المضمون
                 if (globalUserId) {
                     sender = globalUserId.toString();
                 }
@@ -779,7 +881,6 @@
                 return;
             }
             
-            // إرسال البيانات الموحدة للبوت
             tg.sendData(JSON.stringify({ 
                 action: "topup", 
                 amount: amount, 
@@ -889,7 +990,7 @@
                 mediatorsData[day] = [m1, m2];
             });
             tg.sendData(JSON.stringify({ action: "admin_save_mediators", data: mediatorsData }));
-            tg.showAlert("تم إرسال بيانات الوسطاء للحفظ بنجاح!"); tg.close();
+            tg.showAlert("تم إرسال بيانات المشرفين للحفظ بنجاح!"); tg.close();
         }
 
         function setUserLimit(limitNumber) {
