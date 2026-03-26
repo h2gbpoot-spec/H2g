@@ -21,6 +21,7 @@
             --accent-navy: #0A1931; 
             --danger: #FF3B30;
             --success: #34C759;
+            --warning: #FF9500;
             --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
         }
 
@@ -65,7 +66,59 @@
             transition: 0.3s;
         }
 
-        /* 🌟 البادج (الرتبة) وتظبيط السنترة 🌟 */
+        /* بطاقات الرصيد المتعدد */
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, var(--bg-card), var(--accent-navy));
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .balance-card .currency-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .balance-card .currency-amount {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+        
+        .balance-card .currency-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        .balance-card .rate-info {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        .refresh-rates {
+            display: inline-block;
+            background: rgba(0, 230, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .refresh-rates:active {
+            transform: scale(0.95);
+        }
+
         .badge {
             display: inline-flex;
             align-items: center;
@@ -78,7 +131,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             animation: badgeFloat 3s ease-in-out infinite;
         }
-        /* كود لسنترة البادج في صفحة الطبقات بدون أي مسافات */
+
         .badge.no-margin { margin: 0 !important; }
 
         .badge-bronze { background: linear-gradient(135deg, #CD7F32, #8B4513); color: #fff; }
@@ -217,6 +270,20 @@
             color: var(--accent-cyan);
             pointer-events: none;
         }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--text-muted);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -247,6 +314,35 @@
                 <div class="profile-pic-container" onclick="secretAdminTap()">
                     <img src="https://ui-avatars.com/api/?name=User&background=111&color=fff" id="display-photo" class="profile-pic" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=111&color=00E6FF'">
                     <div class="online-dot"></div>
+                </div>
+            </div>
+
+            <!-- عرض الرصيد بجميع العملات -->
+            <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-chart-simple"></i></div>
+                <div class="section-title">رصيدك بالعملات المختلفة</div>
+                <div class="refresh-rates" onclick="refreshExchangeRates()">
+                    <i class="fa-solid fa-rotate-right"></i> تحديث الأسعار
+                </div>
+            </div>
+            <div class="balance-grid">
+                <div class="balance-card">
+                    <div class="currency-icon">🇪🇬</div>
+                    <div class="currency-amount" id="balance-egp">0.00</div>
+                    <div class="currency-name">جنيه مصري EGP</div>
+                    <div class="rate-info" id="rate-egp">السعر الأساسي</div>
+                </div>
+                <div class="balance-card">
+                    <div class="currency-icon">💵</div>
+                    <div class="currency-amount" id="balance-usdt">0.00</div>
+                    <div class="currency-name">دولار USDT</div>
+                    <div class="rate-info" id="rate-usdt">جاري التحميل...</div>
+                </div>
+                <div class="balance-card">
+                    <div class="currency-icon">💎</div>
+                    <div class="currency-amount" id="balance-ton">0.00</div>
+                    <div class="currency-name">تون كوين TON</div>
+                    <div class="rate-info" id="rate-ton">جاري التحميل...</div>
                 </div>
             </div>
 
@@ -348,26 +444,36 @@
                     </span>
                 </div>
                 <input type="text" id="sender_binance" class="input-box" placeholder="اسم حساب بينانس الخاص بك">
+                <div class="card" style="background: rgba(0, 230, 255, 0.05); margin-top: 10px;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <i class="fa-solid fa-info-circle"></i> سعر الصرف الحالي: 1 USDT = <span id="usdt-rate-display">...</span> EGP
+                    </div>
+                </div>
             </div>
 
             <div id="topup_ton" style="display: none;">
-    <div style="background: rgba(0, 230, 255, 0.05); border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color);">
-        <div style="font-size: 13px; font-weight: bold; color: var(--accent-cyan); margin-bottom: 8px;"><i class="fa-solid fa-circle-info"></i> شحن تلقائي عبر تون :</div>
-        <ol style="font-size: 11px; color: var(--text-muted); padding-right: 18px; line-height: 1.6;">
-            <li>انسخ عنوان المحفظة بالأسفل.</li>
-            <li>افتح <b>TonKeeper</b> واضغط إرسال (Send).</li>
-            <li><b>هام جداً:</b> انسخ الـ ID الخاص بك في الخانة أسفل ـ <b>ضعها في الـ تعليق او الكومنت</b> عند التحويل.</li>
-        </ol>
-    </div>
-    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-        <span>حول إلى المحفظة:</span>
-        <span class="copy-badge" onclick="copyToClipboard('UQCJtUwtWG5Jwh6RyyfdBPnXK3NDlBYPmWf6K87uz7Q0sKRm', this)"><strong style="color:var(--accent-cyan)">نسخ العنوان</strong> <i class="fa-regular fa-copy"></i></span>
-    </div>
-    <div class="card" style="background: var(--bg-main); border: 1px dashed var(--accent-cyan); text-align: center; padding: 10px; margin-bottom: 15px;">
-        <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">انسخ الايدي بتاعك وحطه في التعليق وانت بتحول :</span>
-        <strong style="font-size: 18px; color: var(--accent-cyan); letter-spacing: 2px;" id="user-memo-display">...</strong>
-    </div>
-</div>
+                <div style="background: rgba(0, 230, 255, 0.05); border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 13px; font-weight: bold; color: var(--accent-cyan); margin-bottom: 8px;"><i class="fa-solid fa-circle-info"></i> شحن تلقائي عبر تون :</div>
+                    <ol style="font-size: 11px; color: var(--text-muted); padding-right: 18px; line-height: 1.6;">
+                        <li>انسخ عنوان المحفظة بالأسفل.</li>
+                        <li>افتح <b>TonKeeper</b> واضغط إرسال (Send).</li>
+                        <li><b>هام جداً:</b> انسخ الـ ID الخاص بك في الخانة أسفل ـ <b>ضعها في الـ تعليق او الكومنت</b> عند التحويل.</li>
+                    </ol>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>حول إلى المحفظة:</span>
+                    <span class="copy-badge" onclick="copyToClipboard('UQCJtUwtWG5Jwh6RyyfdBPnXK3NDlBYPmWf6K87uz7Q0sKRm', this)"><strong style="color:var(--accent-cyan)">نسخ العنوان</strong> <i class="fa-regular fa-copy"></i></span>
+                </div>
+                <div class="card" style="background: var(--bg-main); border: 1px dashed var(--accent-cyan); text-align: center; padding: 10px; margin-bottom: 15px;">
+                    <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">انسخ الايدي بتاعك وحطه في التعليق وانت بتحول :</span>
+                    <strong style="font-size: 18px; color: var(--accent-cyan); letter-spacing: 2px;" id="user-memo-display">...</strong>
+                </div>
+                <div class="card" style="background: rgba(0, 230, 255, 0.05); margin-top: 5px;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        <i class="fa-solid fa-info-circle"></i> سعر الصرف الحالي: 1 TON = <span id="ton-rate-display">...</span> EGP
+                    </div>
+                </div>
+            </div>
             <button class="btn-primary" onclick="submitTopup()">تأكيد طلب الشحن</button>
 
             <div class="section-title" style="margin-top: 30px; margin-bottom: 10px;"><i class="fa-solid fa-gift"></i> كود هدية (برومو كود)</div>
@@ -385,6 +491,7 @@
                     <span id="withdraw-balance">0.00</span> 
                     <span style="font-size: 16px;" id="withdraw-currency-label">EGP</span>
                 </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;" id="withdraw-balance-hint"></div>
             </div>
 
             <div class="section-title" style="margin-top: 20px; margin-bottom: 10px;">طلب سحب رصيد</div>
@@ -430,6 +537,9 @@
                     <div style="font-size: 12px; color: var(--text-muted);">
                         <i class="fa-solid fa-info-circle"></i> سيتم تحويل المبلغ بالدولار USDT إلى حسابك في بينانس
                     </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fa-solid fa-exchange-alt"></i> 1 USDT = <span id="withdraw-usdt-rate">...</span> EGP
+                    </div>
                 </div>
             </div>
 
@@ -442,6 +552,9 @@
                 <div style="background: rgba(0, 230, 255, 0.05); border-radius: 12px; padding: 12px; margin-top: 10px;">
                     <div style="font-size: 12px; color: var(--text-muted);">
                         <i class="fa-solid fa-info-circle"></i> سيتم تحويل المبلغ بعملة TON إلى عنوان محفظتك في تون كيبر
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fa-solid fa-exchange-alt"></i> 1 TON = <span id="withdraw-ton-rate">...</span> EGP
                     </div>
                 </div>
             </div>
@@ -615,13 +728,90 @@
         tg.expand();
         let globalUserId = "";
         let currentWithdrawMethod = 'vfcash';
-        let currentBalance = 0;
+        let currentBalanceEGP = 0;
         
-        // أسعار الصرف (يتم تحديثها من البوت)
+        // أسعار الصرف (يتم تحديثها من API)
         let exchangeRates = {
-            usdt_to_egp: 48.5,  // 1 USDT = 48.5 EGP
-            ton_to_egp: 185     // 1 TON = 185 EGP
+            usdt_to_egp: 48.5,
+            ton_to_egp: 185
         };
+        
+        // جلب أسعار الصرف من Binance API
+        async function fetchExchangeRates() {
+            try {
+                // تحديث حالة التحميل
+                document.getElementById('rate-usdt').innerHTML = '<span class="loading-spinner"></span>';
+                document.getElementById('rate-ton').innerHTML = '<span class="loading-spinner"></span>';
+                
+                // جلب سعر USDT/EGP من Binance (USDT/EGP غير متاح مباشرة، نستخدم USDT/USD ثم نحول)
+                const usdtResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY');
+                let usdtToTry = 0;
+                if (usdtResponse.ok) {
+                    const usdtData = await usdtResponse.json();
+                    usdtToTry = parseFloat(usdtData.price);
+                    // سعر تقريبي لليرة التركية مقابل الجنيه (حوالي 1 TRY = 1 EGP تقريباً)
+                    exchangeRates.usdt_to_egp = usdtToTry * 0.95;
+                }
+                
+                // جلب سعر TON/USDT من Binance
+                const tonResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT');
+                if (tonResponse.ok) {
+                    const tonData = await tonResponse.json();
+                    const tonUsdt = parseFloat(tonData.price);
+                    exchangeRates.ton_to_egp = tonUsdt * exchangeRates.usdt_to_egp;
+                }
+                
+                // تحديث العرض
+                document.getElementById('rate-usdt').innerHTML = `1 USDT = ${exchangeRates.usdt_to_egp.toFixed(2)} EGP`;
+                document.getElementById('rate-ton').innerHTML = `1 TON = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`;
+                document.getElementById('usdt-rate-display').innerHTML = exchangeRates.usdt_to_egp.toFixed(2);
+                document.getElementById('ton-rate-display').innerHTML = exchangeRates.ton_to_egp.toFixed(2);
+                document.getElementById('withdraw-usdt-rate').innerHTML = exchangeRates.usdt_to_egp.toFixed(2);
+                document.getElementById('withdraw-ton-rate').innerHTML = exchangeRates.ton_to_egp.toFixed(2);
+                
+                // تحديث عرض الرصيد بجميع العملات
+                updateAllBalances();
+                
+                return true;
+            } catch (error) {
+                console.error('خطأ في جلب الأسعار:', error);
+                document.getElementById('rate-usdt').innerHTML = '⚠️ خطأ في التحديث';
+                document.getElementById('rate-ton').innerHTML = '⚠️ خطأ في التحديث';
+                return false;
+            }
+        }
+        
+        // تحديث عرض الرصيد بجميع العملات
+        function updateAllBalances() {
+            // عرض الرصيد بالجنيه
+            document.getElementById('balance-egp').innerHTML = currentBalanceEGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('user-balance').innerHTML = currentBalanceEGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('withdraw-balance').innerHTML = currentBalanceEGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            // حساب وعرض الرصيد بالدولار
+            const usdtBalance = currentBalanceEGP / exchangeRates.usdt_to_egp;
+            document.getElementById('balance-usdt').innerHTML = usdtBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            // حساب وعرض الرصيد بالتون
+            const tonBalance = currentBalanceEGP / exchangeRates.ton_to_egp;
+            document.getElementById('balance-ton').innerHTML = tonBalance.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+            
+            // تحديث النص الإضافي في صفحة السحب
+            const hintText = document.getElementById('withdraw-balance-hint');
+            if (hintText) {
+                hintText.innerHTML = `≈ ${usdtBalance.toFixed(2)} USDT | ≈ ${tonBalance.toFixed(4)} TON`;
+            }
+        }
+        
+        // تحديث الأسعار يدوياً
+        async function refreshExchangeRates() {
+            const refreshBtn = document.querySelector('.refresh-rates');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<span class="loading-spinner"></span> جاري التحديث...';
+            await fetchExchangeRates();
+            refreshBtn.innerHTML = originalText;
+            tg.showAlert('✅ تم تحديث أسعار الصرف بنجاح!');
+        }
         
         try {
             let userLang = (tg.initDataUnsafe?.user?.language_code) || navigator.language || 'ar';
@@ -813,8 +1003,8 @@
                     tg.showAlert("⚠️ يرجى إدخال مبلغ صحيح أكبر من صفر!");
                     return;
                 }
-                if (amount > currentBalance) {
-                    tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalance} EGP لا يكفي للسحب!`);
+                if (amount > currentBalanceEGP) {
+                    tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalanceEGP.toFixed(2)} EGP لا يكفي للسحب!`);
                     return;
                 }
             } else if (currentWithdrawMethod === "binance") {
@@ -831,8 +1021,8 @@
                 }
                 // تحويل المبلغ من USDT إلى EGP للتحقق من الرصيد
                 const amountInEGP = amount * exchangeRates.usdt_to_egp;
-                if (amountInEGP > currentBalance) {
-                    tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalance} EGP لا يكفي للسحب!\nالمبلغ المطلوب يعادل ${amountInEGP.toFixed(2)} EGP`);
+                if (amountInEGP > currentBalanceEGP) {
+                    tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalanceEGP.toFixed(2)} EGP لا يكفي للسحب!\nالمبلغ المطلوب يعادل ${amountInEGP.toFixed(2)} EGP`);
                     return;
                 }
             } else if (currentWithdrawMethod === "ton") {
@@ -849,8 +1039,8 @@
                 }
                 // تحويل المبلغ من TON إلى EGP للتحقق من الرصيد
                 const amountInEGP = amount * exchangeRates.ton_to_egp;
-                if (amountInEGP > currentBalance) {
-                    tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalance} EGP لا يكفي للسحب!\nالمبلغ المطلوب يعادل ${amountInEGP.toFixed(2)} EGP`);
+                if (amountInEGP > currentBalanceEGP) {
+                    tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalanceEGP.toFixed(2)} EGP لا يكفي للسحب!\nالمبلغ المطلوب يعادل ${amountInEGP.toFixed(2)} EGP`);
                     return;
                 }
             }
@@ -869,24 +1059,17 @@
             tg.close();
         }
 
-        function initProfile() {
+        async function initProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             globalUserId = tg.initDataUnsafe?.user?.id || urlParams.get('user_id');
             const rawBalance = urlParams.get('balance') || '0';
-            currentBalance = parseFloat(rawBalance);
-            const userBalance = currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
-            document.getElementById('user-balance').innerText = userBalance;
-            document.getElementById('withdraw-balance').innerText = userBalance;
-
-            // تحديث أسعار الصرف من البوت إذا وجدت
-            const ratesParam = urlParams.get('exchange_rates');
-            if (ratesParam) {
-                try {
-                    const rates = JSON.parse(decodeURIComponent(ratesParam));
-                    if (rates.usdt_to_egp) exchangeRates.usdt_to_egp = rates.usdt_to_egp;
-                    if (rates.ton_to_egp) exchangeRates.ton_to_egp = rates.ton_to_egp;
-                } catch(e) {}
-            }
+            currentBalanceEGP = parseFloat(rawBalance);
+            
+            // تحديث أسعار الصرف أولاً
+            await fetchExchangeRates();
+            
+            // تحديث عرض الرصيد
+            updateAllBalances();
 
             let urlName = urlParams.get('name');
             let urlUser = urlParams.get('username');
@@ -1154,6 +1337,11 @@
         tg.ready();
         initProfile();
         renderAds();
+        
+        // تحديث الأسعار كل 5 دقائق
+        setInterval(() => {
+            fetchExchangeRates();
+        }, 300000);
     </script>
 </body>
 </html>
