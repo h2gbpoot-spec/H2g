@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -181,7 +182,38 @@
         .btn-danger { background: linear-gradient(90deg, #FF3B30, #C51104); }
         .btn-warning { background: linear-gradient(90deg, #FF9500, #E08300); }
 
+        .converted-amount-card {
+            background: linear-gradient(135deg, rgba(0, 230, 255, 0.1), rgba(0, 123, 255, 0.05));
+            border: 1px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .converted-amount-card i {
+            color: var(--accent-cyan);
+            margin-left: 8px;
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--text-muted);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -316,23 +348,23 @@
             </div>
 
             <div id="topup_ton" style="display: none;">
-    <div style="background: rgba(0, 230, 255, 0.05); border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color);">
-        <div style="font-size: 13px; font-weight: bold; color: var(--accent-cyan); margin-bottom: 8px;"><i class="fa-solid fa-circle-info"></i> شحن تلقائي عبر تون :</div>
-        <ol style="font-size: 11px; color: var(--text-muted); padding-right: 18px; line-height: 1.6;">
-            <li>انسخ عنوان المحفظة بالأسفل.</li>
-            <li>افتح <b>TonKeeper</b> واضغط إرسال (Send).</li>
-            <li><b>هام جداً:</b> انسخ الـ ID الخاص بك في الخانة أسفل ـ <b>ضعها في الـ تعليق او الكومنت</b> عند التحويل.</li>
-        </ol>
-    </div>
-    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-        <span>حول إلى المحفظة:</span>
-        <span class="copy-badge" onclick="copyToClipboard('UQCJtUwtWG5Jwh6RyyfdBPnXK3NDlBYPmWf6K87uz7Q0sKRm', this)"><strong style="color:var(--accent-cyan)">نسخ العنوان</strong> <i class="fa-regular fa-copy"></i></span>
-    </div>
-    <div class="card" style="background: var(--bg-main); border: 1px dashed var(--accent-cyan); text-align: center; padding: 10px; margin-bottom: 15px;">
-        <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">انسخ الايدي بتاعك وحطه في التعليق وانت بتحول :</span>
-        <strong style="font-size: 18px; color: var(--accent-cyan); letter-spacing: 2px;" id="user-memo-display">...</strong>
-    </div>
-</div>
+                <div style="background: rgba(0, 230, 255, 0.05); border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color);">
+                    <div style="font-size: 13px; font-weight: bold; color: var(--accent-cyan); margin-bottom: 8px;"><i class="fa-solid fa-circle-info"></i> شحن تلقائي عبر تون :</div>
+                    <ol style="font-size: 11px; color: var(--text-muted); padding-right: 18px; line-height: 1.6;">
+                        <li>انسخ عنوان المحفظة بالأسفل.</li>
+                        <li>افتح <b>TonKeeper</b> واضغط إرسال (Send).</li>
+                        <li><b>هام جداً:</b> انسخ الـ ID الخاص بك في الخانة أسفل ـ <b>ضعها في الـ تعليق او الكومنت</b> عند التحويل.</li>
+                    </ol>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>حول إلى المحفظة:</span>
+                    <span class="copy-badge" onclick="copyToClipboard('UQCJtUwtWG5Jwh6RyyfdBPnXK3NDlBYPmWf6K87uz7Q0sKRm', this)"><strong style="color:var(--accent-cyan)">نسخ العنوان</strong> <i class="fa-regular fa-copy"></i></span>
+                </div>
+                <div class="card" style="background: var(--bg-main); border: 1px dashed var(--accent-cyan); text-align: center; padding: 10px; margin-bottom: 15px;">
+                    <span style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">انسخ الايدي بتاعك وحطه في التعليق وانت بتحول :</span>
+                    <strong style="font-size: 18px; color: var(--accent-cyan); letter-spacing: 2px;" id="user-memo-display">...</strong>
+                </div>
+            </div>
             <button class="btn-primary" onclick="submitTopup()">تأكيد طلب الشحن</button>
 
             <div class="section-title" style="margin-top: 30px; margin-bottom: 10px;"><i class="fa-solid fa-gift"></i> كود هدية (برومو كود)</div>
@@ -342,7 +374,7 @@
             </div>
         </div>
 
-        <!-- قسم السحب الجديد -->
+        <!-- قسم السحب الجديد مع API بينانس -->
         <div id="screen-withdraw" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح للسحب</div>
@@ -350,7 +382,7 @@
             </div>
 
             <div class="section-title" style="margin-top: 20px; margin-bottom: 10px;">سحب رصيد</div>
-            <input type="number" id="withdraw_amount" min="1" step="any" class="input-box" placeholder="أدخل المبلغ المراد سحبه...">
+            <input type="number" id="withdraw_amount" min="1" step="any" class="input-box" placeholder="أدخل المبلغ المراد سحبه..." oninput="updateConvertedAmount()">
 
             <div class="grid-options" style="margin-bottom: 15px;">
                 <div class="option-box active" id="btn-withdraw-vfcash" onclick="setWithdrawMethod('vfcash')">فودافون كاش</div>
@@ -360,17 +392,29 @@
 
             <div id="withdraw_vfcash" style="display: block;">
                 <input type="tel" id="withdraw_phone" class="input-box" placeholder="رقم فودافون كاش لاستلام السحب">
-                <div id="withdraw_vfcash_amount" style="font-size: 14px; color: var(--text-muted); margin-top: 5px; text-align: center;"></div>
+                <div id="withdraw_vfcash_amount" class="converted-amount-card">
+                    <i class="fa-solid fa-pound-sign"></i> المبلغ المستلم: <span id="vfcash_converted">0.00</span> EGP
+                </div>
             </div>
 
             <div id="withdraw_binance" style="display: none;">
                 <input type="text" id="withdraw_binance_id" class="input-box" placeholder="ID حساب بينانس لاستلام السحب">
-                <div id="withdraw_binance_amount" style="font-size: 14px; color: var(--text-muted); margin-top: 5px; text-align: center;"></div>
+                <div id="withdraw_binance_amount" class="converted-amount-card">
+                    <i class="fa-solid fa-dollar-sign"></i> المبلغ المستلم: <span id="binance_converted">0.00</span> USDT
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fa-solid fa-chart-line"></i> سعر الصرف: 1 USDT = <span id="usdt_rate">--</span> EGP
+                    </div>
+                </div>
             </div>
 
             <div id="withdraw_ton" style="display: none;">
                 <input type="text" id="withdraw_ton_wallet" class="input-box" placeholder="عنوان محفظة تون كيبر لاستلام السحب">
-                <div id="withdraw_ton_amount" style="font-size: 14px; color: var(--text-muted); margin-top: 5px; text-align: center;"></div>
+                <div id="withdraw_ton_amount" class="converted-amount-card">
+                    <i class="fa-solid fa-coins"></i> المبلغ المستلم: <span id="ton_converted">0.00</span> TON
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
+                        <i class="fa-solid fa-chart-line"></i> سعر الصرف: 1 TON = <span id="ton_rate">--</span> EGP
+                    </div>
+                </div>
             </div>
 
             <button class="btn-primary" onclick="submitWithdraw()">تأكيد طلب السحب</button>
@@ -459,7 +503,7 @@
                 </div>
         </div>
 
-<div id="screen-admin" class="screen">
+        <div id="screen-admin" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-calendar-days"></i></div>
                 <div class="section-title">إدارة وسطاء الأيام</div>
@@ -517,7 +561,7 @@
                 </div>
             </div>
             
-<div class="section-header">
+            <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-wallet"></i></div>
                 <div class="section-title">إدارة الأرصدة</div>
             </div>
@@ -556,8 +600,9 @@
         tg.expand();
         let globalUserId = "";
         let currentWithdrawMethod = 'vfcash';
-        let usdtRate = 0;
-        let tonRate = 0;
+        let usdtRate = null;
+        let tonRate = null;
+        let isLoadingRates = false;
         
         try {
             let userLang = (tg.initDataUnsafe?.user?.language_code) || navigator.language || 'ar';
@@ -568,6 +613,91 @@
                 window.location.replace("en.html" + currentSearch + separator + "lang_changed=true");
             }
         } catch(e) { console.error(e); }
+
+        // دالة جلب سعر الصرف من Binance API
+        async function fetchExchangeRates() {
+            if (isLoadingRates) return;
+            isLoadingRates = true;
+            
+            try {
+                // جلب سعر USDT/EGP من Binance P2P أو API
+                // نستخدم Binance API للحصول على سعر USDT مقابل USDT (ثابت) ثم نحتاج سعر EGP/USDT
+                // الحل: نستخدم API Binance للحصول على سعر USDT/BUSD أو نستخدم خدمة خارجية
+                // هنا سنستخدم Binance API للحصول على سعر USDT/EGP من خلال خدمة P2P
+                
+                // جلب سعر TON/USDT من Binance
+                const tonUsdtResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT');
+                const tonUsdtData = await tonUsdtResponse.json();
+                const tonUsdtPrice = parseFloat(tonUsdtData.price);
+                
+                // للحصول على سعر USDT/EGP، نستخدم API Binance P2P
+                // هذا طلب بسيط للحصول على سعر الشراء لـ USDT/EGP
+                const p2pResponse = await fetch('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        asset: 'USDT',
+                        fiat: 'EGP',
+                        tradeType: 'BUY',
+                        page: 1,
+                        rows: 1,
+                        payTypes: []
+                    })
+                });
+                
+                const p2pData = await p2pResponse.json();
+                if (p2pData.data && p2pData.data.length > 0) {
+                    usdtRate = parseFloat(p2pData.data[0].adv.price);
+                } else {
+                    // قيمة افتراضية في حالة فشل الجلب
+                    usdtRate = 48.5;
+                }
+                
+                // حساب سعر TON/EGP
+                tonRate = tonUsdtPrice * usdtRate;
+                
+                // تحديث العرض
+                updateRateDisplay();
+                
+                // تحديث المبلغ المحول إذا كان هناك مبلغ مدخل
+                updateConvertedAmount();
+                
+            } catch (error) {
+                console.error('خطأ في جلب أسعار الصرف:', error);
+                // استخدام قيم افتراضية في حالة الخطأ
+                usdtRate = 48.5;
+                tonRate = 48.5 * 5.2; // افتراضي TON ~ 5.2 USDT
+                updateRateDisplay();
+                updateConvertedAmount();
+            } finally {
+                isLoadingRates = false;
+            }
+        }
+        
+        function updateRateDisplay() {
+            if (usdtRate) {
+                document.getElementById('usdt_rate').innerText = usdtRate.toFixed(2);
+            }
+            if (tonRate) {
+                document.getElementById('ton_rate').innerText = tonRate.toFixed(2);
+            }
+        }
+        
+        function updateConvertedAmount() {
+            let amountEGP = parseFloat(document.getElementById('withdraw_amount').value) || 0;
+            
+            if (currentWithdrawMethod === 'binance' && usdtRate) {
+                let usdtAmount = amountEGP / usdtRate;
+                document.getElementById('binance_converted').innerText = usdtAmount.toFixed(2);
+            } else if (currentWithdrawMethod === 'ton' && tonRate) {
+                let tonAmount = amountEGP / tonRate;
+                document.getElementById('ton_converted').innerText = tonAmount.toFixed(4);
+            } else if (currentWithdrawMethod === 'vfcash') {
+                document.getElementById('vfcash_converted').innerText = amountEGP.toFixed(2);
+            }
+        }
 
         function updateUserRank(adsCount) {
             const container = document.getElementById('user-rank-container');
@@ -592,7 +722,6 @@
             if (activityCount) activityCount.innerText = count;
         }
 
-        // دالة رسم الإعلانات ديناميكياً مع التاريخ والوقت
         function renderAdHistory(historyArray) {
             const container = document.getElementById('content-ads');
             if (!historyArray || historyArray.length === 0) {
@@ -634,11 +763,6 @@
                     </div>`;
             });
             container.innerHTML = html;
-        }
-
-        // دالة عرض طلبات السحب للمستخدم
-        function renderWithdrawHistory(historyArray) {
-            // يمكن إضافة عرض تاريخ السحوبات هنا إذا رغبت
         }
 
         const promoAds = [
@@ -715,38 +839,15 @@
             tg.close();
         }
 
-        // دالة حساب المبلغ المحول حسب العملة
         function calculateConvertedAmount(amountEGP, method) {
-            if (method === 'binance' && usdtRate > 0) {
+            if (method === 'binance' && usdtRate && usdtRate > 0) {
                 return (amountEGP / usdtRate).toFixed(2);
-            } else if (method === 'ton' && tonRate > 0) {
+            } else if (method === 'ton' && tonRate && tonRate > 0) {
                 return (amountEGP / tonRate).toFixed(4);
             }
             return amountEGP;
         }
 
-        // تحديث عرض المبلغ المحول
-        function updateWithdrawAmountDisplay() {
-            let amountEGP = parseFloat(document.getElementById('withdraw_amount').value) || 0;
-            
-            if (currentWithdrawMethod === 'binance') {
-                let usdtAmount = calculateConvertedAmount(amountEGP, 'binance');
-                document.getElementById('withdraw_binance_amount').innerHTML = `<i class="fa-solid fa-dollar-sign"></i> المبلغ المستلم: ${usdtAmount} USDT`;
-                document.getElementById('withdraw_vfcash_amount').innerHTML = '';
-                document.getElementById('withdraw_ton_amount').innerHTML = '';
-            } else if (currentWithdrawMethod === 'ton') {
-                let tonAmount = calculateConvertedAmount(amountEGP, 'ton');
-                document.getElementById('withdraw_ton_amount').innerHTML = `<i class="fa-solid fa-coins"></i> المبلغ المستلم: ${tonAmount} TON`;
-                document.getElementById('withdraw_binance_amount').innerHTML = '';
-                document.getElementById('withdraw_vfcash_amount').innerHTML = '';
-            } else {
-                document.getElementById('withdraw_vfcash_amount').innerHTML = `<i class="fa-solid fa-pound-sign"></i> المبلغ المستلم: ${amountEGP.toFixed(2)} EGP`;
-                document.getElementById('withdraw_binance_amount').innerHTML = '';
-                document.getElementById('withdraw_ton_amount').innerHTML = '';
-            }
-        }
-
-        // دالة تحديد طريقة السحب
         function setWithdrawMethod(method) {
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
             currentWithdrawMethod = method;
@@ -759,15 +860,15 @@
             document.getElementById('withdraw_binance').style.display = method === 'binance' ? 'block' : 'none';
             document.getElementById('withdraw_ton').style.display = method === 'ton' ? 'block' : 'none';
             
-            updateWithdrawAmountDisplay();
+            updateConvertedAmount();
         }
 
-        // دالة تقديم طلب السحب
         function submitWithdraw() {
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
             
             let amount = document.getElementById("withdraw_amount").value;
             let recipient = "";
+            let convertedAmount = 0;
             
             if (currentWithdrawMethod === "vfcash") {
                 recipient = document.getElementById("withdraw_phone").value;
@@ -779,18 +880,31 @@
                     tg.showAlert("⚠️ يرجى إدخال رقم موبايل مصري صحيح!");
                     return;
                 }
+                convertedAmount = parseFloat(amount);
             } else if (currentWithdrawMethod === "binance") {
                 recipient = document.getElementById("withdraw_binance_id").value;
                 if (!recipient) {
                     tg.showAlert("⚠️ يرجى إدخال ID حساب بينانس!");
                     return;
                 }
+                if (!usdtRate) {
+                    tg.showAlert("⚠️ جاري تحميل سعر الصرف... يرجى المحاولة مرة أخرى.");
+                    fetchExchangeRates();
+                    return;
+                }
+                convertedAmount = parseFloat(amount) / usdtRate;
             } else if (currentWithdrawMethod === "ton") {
                 recipient = document.getElementById("withdraw_ton_wallet").value;
                 if (!recipient) {
                     tg.showAlert("⚠️ يرجى إدخال عنوان محفظة تون كيبر!");
                     return;
                 }
+                if (!tonRate) {
+                    tg.showAlert("⚠️ جاري تحميل سعر الصرف... يرجى المحاولة مرة أخرى.");
+                    fetchExchangeRates();
+                    return;
+                }
+                convertedAmount = parseFloat(amount) / tonRate;
             }
 
             if (!amount || parseFloat(amount) <= 0) {
@@ -804,13 +918,14 @@
                 return;
             }
             
-            // إرسال طلب السحب للبوت
             tg.sendData(JSON.stringify({ 
                 action: "withdraw", 
                 amount: amount, 
                 method: currentWithdrawMethod, 
                 recipient: recipient,
-                converted_amount: calculateConvertedAmount(parseFloat(amount), currentWithdrawMethod)
+                converted_amount: convertedAmount.toFixed(currentWithdrawMethod === 'ton' ? 4 : 2),
+                usdt_rate: usdtRate,
+                ton_rate: tonRate
             }));
             
             tg.close();
@@ -833,15 +948,20 @@
             let userAds = urlParams.get('user_ads') || '0';
             let urlHistory = urlParams.get('history');
             
-            // جلب أسعار العملات من البوت
+            // جلب أسعار العملات من البوت أو من API مباشرة
             let rates = urlParams.get('rates');
             if (rates) {
                 try {
                     let parsedRates = JSON.parse(decodeURIComponent(rates));
-                    usdtRate = parsedRates.usdt || 0;
-                    tonRate = parsedRates.ton || 0;
+                    usdtRate = parsedRates.usdt || null;
+                    tonRate = parsedRates.ton || null;
+                    if (usdtRate) updateRateDisplay();
+                    if (tonRate) updateRateDisplay();
                 } catch(e) {}
             }
+            
+            // جلب الأسعار من Binance API
+            fetchExchangeRates();
 
             if (tg.colorScheme === 'light') {
                 document.documentElement.setAttribute('data-theme', 'light');
@@ -890,7 +1010,6 @@
                 } catch(e) {}
             }
             
-            // جلب بيانات المشرفين
             let urlAdmins = urlParams.get('admins');
             if (urlAdmins) {
                 try {
@@ -925,8 +1044,7 @@
 
             if (!urlName) document.getElementById('display-name').innerText = "مستخدم سوبر تون";
             
-            // إضافة مستمع لتحديث المبلغ المحول عند تغيير المبلغ
-            document.getElementById('withdraw_amount').addEventListener('input', updateWithdrawAmountDisplay);
+            document.getElementById('withdraw_amount').addEventListener('input', updateConvertedAmount);
         }
 
         function submitTopup() {
@@ -975,11 +1093,10 @@
             document.getElementById(`screen-${tab}`).classList.add('active');
             document.getElementById(`nav-${tab}`).classList.add('active');
             
-            // تحديث الرصيد المعروض في صفحة السحب عند الدخول إليها
             if (tab === 'withdraw') {
                 let balance = document.getElementById('user-balance').innerText;
                 document.getElementById('withdraw-balance').innerText = balance;
-                updateWithdrawAmountDisplay();
+                updateConvertedAmount();
             }
         }
 
