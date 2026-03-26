@@ -66,7 +66,6 @@
             transition: 0.3s;
         }
 
-        /* 🌟 البادج (الرتبة) وتظبيط السنترة 🌟 */
         .badge {
             display: inline-flex;
             align-items: center;
@@ -79,7 +78,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             animation: badgeFloat 3s ease-in-out infinite;
         }
-        /* كود لسنترة البادج في صفحة الطبقات بدون أي مسافات */
         .badge.no-margin { margin: 0 !important; }
 
         .badge-bronze { background: linear-gradient(135deg, #CD7F32, #8B4513); color: #fff; }
@@ -213,6 +211,13 @@
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        .rate-update-time {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -374,7 +379,7 @@
             </div>
         </div>
 
-        <!-- قسم السحب الجديد مع API بينانس -->
+        <!-- قسم السحب الجديد مع API بينانس محدثة -->
         <div id="screen-withdraw" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح للسحب</div>
@@ -402,7 +407,7 @@
                 <div id="withdraw_binance_amount" class="converted-amount-card">
                     <i class="fa-solid fa-dollar-sign"></i> المبلغ المستلم: <span id="binance_converted">0.00</span> USDT
                     <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
-                        <i class="fa-solid fa-chart-line"></i> سعر الصرف: 1 USDT = <span id="usdt_rate">--</span> EGP
+                        <i class="fa-solid fa-chart-line"></i> سعر الصرف: 1 USDT = <span id="usdt_rate">جاري التحميل...</span> EGP
                     </div>
                 </div>
             </div>
@@ -412,9 +417,13 @@
                 <div id="withdraw_ton_amount" class="converted-amount-card">
                     <i class="fa-solid fa-coins"></i> المبلغ المستلم: <span id="ton_converted">0.00</span> TON
                     <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
-                        <i class="fa-solid fa-chart-line"></i> سعر الصرف: 1 TON = <span id="ton_rate">--</span> EGP
+                        <i class="fa-solid fa-chart-line"></i> سعر الصرف: 1 TON = <span id="ton_rate">جاري التحميل...</span> EGP
                     </div>
                 </div>
+            </div>
+            
+            <div class="rate-update-time" id="rate-update-time">
+                <i class="fa-regular fa-clock"></i> جاري تحديث الأسعار...
             </div>
 
             <button class="btn-primary" onclick="submitWithdraw()">تأكيد طلب السحب</button>
@@ -603,6 +612,7 @@
         let usdtRate = null;
         let tonRate = null;
         let isLoadingRates = false;
+        let lastUpdateTime = null;
         
         try {
             let userLang = (tg.initDataUnsafe?.user?.language_code) || navigator.language || 'ar';
@@ -614,25 +624,11 @@
             }
         } catch(e) { console.error(e); }
 
-        // دالة جلب سعر الصرف من Binance API
-        async function fetchExchangeRates() {
-            if (isLoadingRates) return;
-            isLoadingRates = true;
-            
+        // دالة جلب سعر USDT/EGP من Binance API محدثة
+        async function fetchUSDTEGPRate() {
             try {
-                // جلب سعر USDT/EGP من Binance P2P أو API
-                // نستخدم Binance API للحصول على سعر USDT مقابل USDT (ثابت) ثم نحتاج سعر EGP/USDT
-                // الحل: نستخدم API Binance للحصول على سعر USDT/BUSD أو نستخدم خدمة خارجية
-                // هنا سنستخدم Binance API للحصول على سعر USDT/EGP من خلال خدمة P2P
-                
-                // جلب سعر TON/USDT من Binance
-                const tonUsdtResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT');
-                const tonUsdtData = await tonUsdtResponse.json();
-                const tonUsdtPrice = parseFloat(tonUsdtData.price);
-                
-                // للحصول على سعر USDT/EGP، نستخدم API Binance P2P
-                // هذا طلب بسيط للحصول على سعر الشراء لـ USDT/EGP
-                const p2pResponse = await fetch('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', {
+                // استخدام Binance API للحصول على سعر USDT/EGP من خلال سوق P2P
+                const response = await fetch('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -642,35 +638,100 @@
                         fiat: 'EGP',
                         tradeType: 'BUY',
                         page: 1,
-                        rows: 1,
+                        rows: 3,
                         payTypes: []
                     })
                 });
                 
-                const p2pData = await p2pResponse.json();
-                if (p2pData.data && p2pData.data.length > 0) {
-                    usdtRate = parseFloat(p2pData.data[0].adv.price);
+                const data = await response.json();
+                if (data.data && data.data.length > 0) {
+                    // حساب متوسط السعر من أفضل 3 عروض
+                    let totalPrice = 0;
+                    let validOffers = 0;
+                    for (let i = 0; i < Math.min(3, data.data.length); i++) {
+                        if (data.data[i].adv && data.data[i].adv.price) {
+                            totalPrice += parseFloat(data.data[i].adv.price);
+                            validOffers++;
+                        }
+                    }
+                    if (validOffers > 0) {
+                        return totalPrice / validOffers;
+                    }
+                }
+                throw new Error('No valid offers found');
+            } catch (error) {
+                console.error('Error fetching USDT/EGP rate:', error);
+                // استخدام API بديل
+                try {
+                    const fallbackResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTEGP');
+                    if (fallbackResponse.ok) {
+                        const fallbackData = await fallbackResponse.json();
+                        return parseFloat(fallbackData.price);
+                    }
+                } catch (e) {}
+                return null;
+            }
+        }
+        
+        // دالة جلب سعر TON/USDT من Binance API
+        async function fetchTONUSDTRate() {
+            try {
+                const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT');
+                const data = await response.json();
+                if (data && data.price) {
+                    return parseFloat(data.price);
+                }
+                throw new Error('No TON price found');
+            } catch (error) {
+                console.error('Error fetching TON/USDT rate:', error);
+                return null;
+            }
+        }
+        
+        // دالة جلب جميع الأسعار
+        async function fetchExchangeRates() {
+            if (isLoadingRates) return;
+            isLoadingRates = true;
+            
+            try {
+                // تحديث حالة التحميل
+                document.getElementById('usdt_rate').innerHTML = '<span class="loading-spinner"></span> جاري التحميل...';
+                document.getElementById('ton_rate').innerHTML = '<span class="loading-spinner"></span> جاري التحميل...';
+                document.getElementById('rate-update-time').innerHTML = '<i class="fa-regular fa-clock"></i> جاري تحديث الأسعار...';
+                
+                // جلب سعر USDT/EGP
+                const usdtEgpRate = await fetchUSDTEGPRate();
+                if (usdtEgpRate) {
+                    usdtRate = usdtEgpRate;
+                    document.getElementById('usdt_rate').innerHTML = usdtRate.toFixed(2);
                 } else {
-                    // قيمة افتراضية في حالة فشل الجلب
-                    usdtRate = 48.5;
+                    document.getElementById('usdt_rate').innerHTML = 'غير متاح';
                 }
                 
-                // حساب سعر TON/EGP
-                tonRate = tonUsdtPrice * usdtRate;
+                // جلب سعر TON/USDT
+                const tonUsdtRate = await fetchTONUSDTRate();
+                if (tonUsdtRate && usdtRate) {
+                    tonRate = tonUsdtRate * usdtRate;
+                    document.getElementById('ton_rate').innerHTML = tonRate.toFixed(2);
+                } else if (tonUsdtRate) {
+                    tonRate = tonUsdtRate * 48.5; // استخدام قيمة افتراضية لـ USDT
+                    document.getElementById('ton_rate').innerHTML = tonRate.toFixed(2);
+                } else {
+                    document.getElementById('ton_rate').innerHTML = 'غير متاح';
+                }
                 
-                // تحديث العرض
-                updateRateDisplay();
+                // تحديث وقت آخر تحديث
+                lastUpdateTime = new Date();
+                document.getElementById('rate-update-time').innerHTML = `<i class="fa-regular fa-clock"></i> آخر تحديث: ${lastUpdateTime.toLocaleTimeString('ar-EG')}`;
                 
-                // تحديث المبلغ المحول إذا كان هناك مبلغ مدخل
+                // تحديث المبلغ المحول
                 updateConvertedAmount();
                 
             } catch (error) {
-                console.error('خطأ في جلب أسعار الصرف:', error);
-                // استخدام قيم افتراضية في حالة الخطأ
-                usdtRate = 48.5;
-                tonRate = 48.5 * 5.2; // افتراضي TON ~ 5.2 USDT
-                updateRateDisplay();
-                updateConvertedAmount();
+                console.error('Error fetching exchange rates:', error);
+                document.getElementById('usdt_rate').innerHTML = 'خطأ في التحميل';
+                document.getElementById('ton_rate').innerHTML = 'خطأ في التحميل';
+                document.getElementById('rate-update-time').innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> فشل تحديث الأسعار، حاول مرة أخرى';
             } finally {
                 isLoadingRates = false;
             }
@@ -678,24 +739,28 @@
         
         function updateRateDisplay() {
             if (usdtRate) {
-                document.getElementById('usdt_rate').innerText = usdtRate.toFixed(2);
+                document.getElementById('usdt_rate').innerHTML = usdtRate.toFixed(2);
             }
             if (tonRate) {
-                document.getElementById('ton_rate').innerText = tonRate.toFixed(2);
+                document.getElementById('ton_rate').innerHTML = tonRate.toFixed(2);
             }
         }
         
         function updateConvertedAmount() {
             let amountEGP = parseFloat(document.getElementById('withdraw_amount').value) || 0;
             
-            if (currentWithdrawMethod === 'binance' && usdtRate) {
+            if (currentWithdrawMethod === 'binance' && usdtRate && usdtRate > 0) {
                 let usdtAmount = amountEGP / usdtRate;
-                document.getElementById('binance_converted').innerText = usdtAmount.toFixed(2);
-            } else if (currentWithdrawMethod === 'ton' && tonRate) {
+                document.getElementById('binance_converted').innerHTML = usdtAmount.toFixed(2);
+            } else if (currentWithdrawMethod === 'binance') {
+                document.getElementById('binance_converted').innerHTML = '--';
+            } else if (currentWithdrawMethod === 'ton' && tonRate && tonRate > 0) {
                 let tonAmount = amountEGP / tonRate;
-                document.getElementById('ton_converted').innerText = tonAmount.toFixed(4);
+                document.getElementById('ton_converted').innerHTML = tonAmount.toFixed(4);
+            } else if (currentWithdrawMethod === 'ton') {
+                document.getElementById('ton_converted').innerHTML = '--';
             } else if (currentWithdrawMethod === 'vfcash') {
-                document.getElementById('vfcash_converted').innerText = amountEGP.toFixed(2);
+                document.getElementById('vfcash_converted').innerHTML = amountEGP.toFixed(2);
             }
         }
 
@@ -839,15 +904,6 @@
             tg.close();
         }
 
-        function calculateConvertedAmount(amountEGP, method) {
-            if (method === 'binance' && usdtRate && usdtRate > 0) {
-                return (amountEGP / usdtRate).toFixed(2);
-            } else if (method === 'ton' && tonRate && tonRate > 0) {
-                return (amountEGP / tonRate).toFixed(4);
-            }
-            return amountEGP;
-        }
-
         function setWithdrawMethod(method) {
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
             currentWithdrawMethod = method;
@@ -948,7 +1004,7 @@
             let userAds = urlParams.get('user_ads') || '0';
             let urlHistory = urlParams.get('history');
             
-            // جلب أسعار العملات من البوت أو من API مباشرة
+            // جلب أسعار العملات من البوت إن وجدت
             let rates = urlParams.get('rates');
             if (rates) {
                 try {
@@ -960,7 +1016,7 @@
                 } catch(e) {}
             }
             
-            // جلب الأسعار من Binance API
+            // جلب الأسعار من Binance API مباشرة
             fetchExchangeRates();
 
             if (tg.colorScheme === 'light') {
@@ -1045,6 +1101,9 @@
             if (!urlName) document.getElementById('display-name').innerText = "مستخدم سوبر تون";
             
             document.getElementById('withdraw_amount').addEventListener('input', updateConvertedAmount);
+            
+            // تحديث الأسعار كل 5 دقائق
+            setInterval(fetchExchangeRates, 5 * 60 * 1000);
         }
 
         function submitTopup() {
