@@ -870,6 +870,67 @@
             margin-top: 5px;
             text-align: center;
         }
+
+        /* أنماط إضافية لقسم المعاملات */
+        .transaction-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .transaction-stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+        }
+        .transaction-stat-card .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        .transaction-stat-card .stat-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .transaction-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .transaction-type {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .transaction-type.withdraw { color: var(--warning); }
+        .transaction-type.deposit { color: var(--success); }
+        .transaction-date {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--accent-cyan);
+        }
     </style>
 </head>
 <body>
@@ -1181,14 +1242,14 @@
             </div>
         </div>
 
-        <!-- Screen Activity -->
+        <!-- Screen Activity (تم تعديلها) -->
         <div id="screen-activity" class="screen">
             <div class="grid-options" style="margin-bottom: 15px; margin-top: 10px;">
                 <div class="option-box active" id="btn-tab-ranks" onclick="switchActivityTab('ranks')">
-                    <i class="fa-solid fa-ranking-star" style="font-size: 18px; margin-bottom:5px; display:block; color: var(--accent-cyan);"></i> الطبقات
+                    <i class="fa-solid fa-chart-line" style="font-size: 18px; margin-bottom:5px; display:block; color: var(--accent-cyan);"></i> احصائياتي
                 </div>
-                <div class="option-box" id="btn-tab-ads" onclick="switchActivityTab('ads')">
-                    <i class="fa-solid fa-clock-rotate-left" style="font-size: 18px; margin-bottom:5px; display:block;"></i> إعلاناتي
+                <div class="option-box" id="btn-tab-transactions" onclick="switchActivityTab('transactions')">
+                    <i class="fa-solid fa-exchange-alt" style="font-size: 18px; margin-bottom:5px; display:block;"></i> معاملاتي
                 </div>
             </div>
 
@@ -1198,7 +1259,7 @@
                     <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 25px;">
                         <div id="activity-rank-badge" style="transform: scale(1.5);"></div>
                     </div>
-                    <p style="font-size: 14px; font-weight: bold; margin: 0;">إجمالي إعلاناتك: <span id="activity-ads-count" style="color: var(--accent-cyan); font-size: 18px;">0</span></p>
+                    <p style="font-size: 14px; font-weight: bold; margin: 0;">إجمالي التعاملات: <span id="activity-total-transactions" style="color: var(--accent-cyan); font-size: 18px;">0</span> <span style="font-size:12px;">EGP</span></p>
                 </div>
                 <div class="section-title" style="margin: 20px 0 10px 0; text-align: center;">شرح نظام الطبقات</div>
                 <div class="card">
@@ -1223,7 +1284,30 @@
                 </div>
             </div>
 
-            <div id="content-ads" style="display: none; animation: fadeIn 0.3s;"></div>
+            <div id="content-transactions" style="display: none; animation: fadeIn 0.3s;">
+                <!-- سيتم ملء المحتوى بواسطة JavaScript -->
+                <div class="transaction-stats" id="transaction-stats-container">
+                    <div class="transaction-stat-card">
+                        <div class="stat-label">الرصيد المتوفر</div>
+                        <div class="stat-value" id="stats-available-balance">0.00 EGP</div>
+                    </div>
+                    <div class="transaction-stat-card">
+                        <div class="stat-label">الرصيد المسحوب</div>
+                        <div class="stat-value" id="stats-withdrawn-balance">0.00 EGP</div>
+                    </div>
+                    <div class="transaction-stat-card">
+                        <div class="stat-label">الرصيد المستخدم</div>
+                        <div class="stat-value" id="stats-used-balance">0.00 EGP</div>
+                    </div>
+                </div>
+                <div class="section-title" style="margin: 10px 0;">العمليات المكتملة</div>
+                <div id="transactions-list" class="transaction-list">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <p>لا توجد عمليات مكتملة بعد</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Screen Admin -->
@@ -1378,6 +1462,7 @@
                 if (withdrawTonRate) withdrawTonRate.innerHTML = exchangeRates.ton_to_egp.toFixed(2);
                 
                 updateAllBalances();
+                renderTransactions(); // تحديث قسم المعاملات
                 return true;
             } catch (error) {
                 console.error('خطأ في جلب الأسعار:', error);
@@ -1403,6 +1488,7 @@
             
             updateWithdrawDisplay();
             updateWithdrawHints();
+            renderTransactions(); // تحديث المعاملات كلما تغير الرصيد
         }
         
         function updateWithdrawDisplay() {
@@ -1566,7 +1652,6 @@
         function updateUserRank(adsCount) {
             const container = document.getElementById('user-rank-container');
             const activityBadgeContainer = document.getElementById('activity-rank-badge');
-            const activityCount = document.getElementById('activity-ads-count');
             
             let badgeHTML = '';
             let count = parseInt(adsCount) || 0;
@@ -1583,50 +1668,63 @@
 
             if (container) container.innerHTML = badgeHTML;
             if (activityBadgeContainer) activityBadgeContainer.innerHTML = badgeHTML.replace('class="badge ', 'class="badge no-margin ');
-            if (activityCount) activityCount.innerText = count;
         }
 
-        function renderAdHistory(historyArray) {
-            const container = document.getElementById('content-ads');
-            if (!historyArray || historyArray.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted); opacity: 0.7;">
-                        <i class="fa-solid fa-box-open" style="font-size: 40px; margin-bottom: 10px;"></i>
-                        <p style="font-size: 14px;">لم تقم بعمل أي إعلانات حتى الآن.</p>
+        // دالة لعرض الإحصائيات والعمليات في تبويب المعاملات
+        function renderTransactions() {
+            // حساب إجمالي المبالغ المسحوبة بنجاح
+            let totalWithdrawnEGP = 0;
+            if (successWithdrawals && successWithdrawals.length > 0) {
+                totalWithdrawnEGP = successWithdrawals.reduce((sum, w) => sum + (w.amount_egp || 0), 0);
+            }
+            const totalUsed = currentBalanceEGP + totalWithdrawnEGP; // إجمالي الإيداعات (الرصيد المستخدم)
+
+            // تحديث الإحصائيات
+            const availableSpan = document.getElementById('stats-available-balance');
+            const withdrawnSpan = document.getElementById('stats-withdrawn-balance');
+            const usedSpan = document.getElementById('stats-used-balance');
+            if (availableSpan) availableSpan.innerHTML = currentBalanceEGP.toFixed(2) + ' EGP';
+            if (withdrawnSpan) withdrawnSpan.innerHTML = totalWithdrawnEGP.toFixed(2) + ' EGP';
+            if (usedSpan) usedSpan.innerHTML = totalUsed.toFixed(2) + ' EGP';
+
+            // تحديث "إجمالي التعاملات" في تبويب احصائياتي
+            const totalTransSpan = document.getElementById('activity-total-transactions');
+            if (totalTransSpan) totalTransSpan.innerHTML = totalUsed.toFixed(2);
+
+            // عرض العمليات المكتملة (السحوبات الناجحة فقط)
+            const transactionsContainer = document.getElementById('transactions-list');
+            if (!transactionsContainer) return;
+
+            if (!successWithdrawals || successWithdrawals.length === 0) {
+                transactionsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <p>لا توجد عمليات مكتملة بعد</p>
                     </div>`;
                 return;
             }
 
             let html = '';
-            historyArray.forEach((ad, index) => {
-                let isPromo = [50, 80, 120, 150, 250].includes(ad.price);
-                let adName = isPromo ? "إعلان ترويجي ✨" : "إعلان عادي ⚡";
-                let adColor = isPromo ? "var(--success)" : "var(--text-muted)";
-                
-                let dateStr = "إعلان قديم";
-                if (ad.date) {
-                    let d = new Date(ad.date.replace(' ', 'T') + 'Z');
-                    if (!isNaN(d)) {
-                        dateStr = d.toLocaleDateString('ar-EG', { 
-                            month: 'short', day: 'numeric', 
-                            hour: 'numeric', minute: '2-digit', hour12: true 
-                        });
-                    }
-                }
-
+            // عرض السحوبات الناجحة كعمليات مكتملة
+            successWithdrawals.forEach(w => {
+                const methodName = w.method === 'vfcash' ? 'فودافون كاش' : (w.method === 'binance' ? 'بينانس' : 'تون كيبر');
+                const typeClass = 'withdraw';
+                const amountStr = `${w.amount} ${w.currency || 'EGP'}`;
+                const amountEGP = w.amount_egp ? w.amount_egp.toFixed(2) : '0.00';
                 html += `
-                    <div class="card" style="border-right: 4px solid ${adColor}; animation: fadeIn 0.3s;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <strong style="font-size: 14px;">${adName}</strong>
-                            <span style="color: ${adColor}; font-weight: bold; font-size: 13px;">${ad.price} EGP</span>
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div class="transaction-type ${typeClass}">
+                                <i class="fa-solid fa-arrow-up-from-bracket"></i> سحب عبر ${methodName}
+                            </div>
+                            <div class="transaction-date">${w.completed_date || w.date || ''}</div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
-                            <span><i class="fa-regular fa-clock"></i> ${dateStr}</span>
-                            <span><i class="fa-solid fa-hashtag"></i> إعلان #${historyArray.length - index}</span>
-                        </div>
-                    </div>`;
+                        <div class="transaction-amount">- ${amountStr}</div>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-muted); margin-top:-5px; margin-bottom:5px; padding-right:12px;">ما يعادل ${amountEGP} EGP</div>
+                `;
             });
-            container.innerHTML = html;
+            transactionsContainer.innerHTML = html;
         }
         
         function renderWithdrawalRequests() {
@@ -1668,6 +1766,8 @@
                     </div>
                 `).join('');
             }
+            // تحديث قسم المعاملات لأن successWithdrawals تغير
+            renderTransactions();
         }
         
         function switchWithdrawTab(tab) {
@@ -1706,18 +1806,24 @@
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
             
             const ranksBtn = document.getElementById('btn-tab-ranks');
-            const adsBtn = document.getElementById('btn-tab-ads');
+            const transBtn = document.getElementById('btn-tab-transactions');
             const ranksContent = document.getElementById('content-ranks');
-            const adsContent = document.getElementById('content-ads');
+            const transContent = document.getElementById('content-transactions');
             
             if (ranksBtn) ranksBtn.classList.remove('active');
-            if (adsBtn) adsBtn.classList.remove('active');
+            if (transBtn) transBtn.classList.remove('active');
             
-            let activeBtn = document.getElementById(`btn-tab-${tab}`);
-            if (activeBtn) activeBtn.classList.add('active');
-            
-            if (ranksContent) ranksContent.style.display = tab === 'ranks' ? 'block' : 'none';
-            if (adsContent) adsContent.style.display = tab === 'ads' ? 'block' : 'none';
+            if (tab === 'ranks') {
+                if (ranksBtn) ranksBtn.classList.add('active');
+                if (ranksContent) ranksContent.style.display = 'block';
+                if (transContent) transContent.style.display = 'none';
+            } else {
+                if (transBtn) transBtn.classList.add('active');
+                if (ranksContent) ranksContent.style.display = 'none';
+                if (transContent) transContent.style.display = 'block';
+                // تحديث المعاملات عند عرضها للتأكد من البيانات الحديثة
+                renderTransactions();
+            }
         }
 
         // دوال الشريط الجانبي
@@ -2005,19 +2111,16 @@
 
             updateUserRank(userAds);
 
-            if (urlHistory && urlHistory !== 'None' && urlHistory !== '') {
-                try {
-                    let parsedHistory = JSON.parse(decodeURIComponent(urlHistory));
-                    renderAdHistory(parsedHistory);
-                } catch(e) { renderAdHistory([]); }
-            } else {
-                renderAdHistory([]);
-            }
+            // لا حاجة لعرض تاريخ الإعلانات القديم
+            // renderAdHistory تم إلغاؤه
 
             if (globalUserId) {
                 const userMemo = document.getElementById('user-memo-display');
                 if (userMemo) userMemo.innerText = globalUserId;
             }
+            
+            // عرض المعاملات لأول مرة
+            renderTransactions();
         }
         
         // دعم السحب لليسار لفتح الشريط الجانبي
@@ -2040,4 +2143,4 @@
         }, 300000);
     </script>
 </body>
-</html>
+    </html>
