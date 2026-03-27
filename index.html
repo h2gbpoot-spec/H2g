@@ -262,9 +262,9 @@
             text-align: center;
         }
         
-        .usdt-display, .ton-display {
-            font-size: 13px;
-            font-weight: bold;
+        .withdraw-amount-display {
+            font-size: 32px;
+            font-weight: 800;
             color: var(--accent-cyan);
         }
     </style>
@@ -470,7 +470,6 @@
                     <span id="withdraw-balance">0.00</span> 
                     <span style="font-size: 16px;" id="withdraw-currency-label">EGP</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;" id="withdraw-balance-hint"></div>
             </div>
 
             <div class="section-title" style="margin-top: 20px; margin-bottom: 10px;">طلب سحب رصيد</div>
@@ -790,14 +789,11 @@
         function updateAllBalances() {
             const balanceEgp = document.getElementById('balance-egp');
             const userBalance = document.getElementById('user-balance');
-            const withdrawBalance = document.getElementById('withdraw-balance');
             const balanceUsdt = document.getElementById('balance-usdt');
             const balanceTon = document.getElementById('balance-ton');
-            const withdrawHint = document.getElementById('withdraw-balance-hint');
             
             if (balanceEgp) balanceEgp.innerHTML = currentBalanceEGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (userBalance) userBalance.innerHTML = currentBalanceEGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            if (withdrawBalance) withdrawBalance.innerHTML = currentBalanceEGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             
             const usdtBalance = currentBalanceEGP / exchangeRates.usdt_to_egp;
             const tonBalance = currentBalanceEGP / exchangeRates.ton_to_egp;
@@ -805,11 +801,28 @@
             if (balanceUsdt) balanceUsdt.innerHTML = usdtBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (balanceTon) balanceTon.innerHTML = tonBalance.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
             
-            if (withdrawHint) {
-                withdrawHint.innerHTML = `≈ ${usdtBalance.toFixed(2)} USDT | ≈ ${tonBalance.toFixed(4)} TON`;
-            }
-            
+            updateWithdrawDisplay();
             updateWithdrawHints();
+        }
+        
+        function updateWithdrawDisplay() {
+            const withdrawBalanceSpan = document.getElementById('withdraw-balance');
+            const currencyLabel = document.getElementById('withdraw-currency-label');
+            
+            if (!withdrawBalanceSpan) return;
+            
+            if (currentWithdrawMethod === 'vfcash') {
+                withdrawBalanceSpan.innerHTML = currentBalanceEGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (currencyLabel) currencyLabel.innerHTML = 'EGP 🇪🇬';
+            } else if (currentWithdrawMethod === 'binance') {
+                const usdtBalance = currentBalanceEGP / exchangeRates.usdt_to_egp;
+                withdrawBalanceSpan.innerHTML = usdtBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (currencyLabel) currencyLabel.innerHTML = 'USDT 💵';
+            } else if (currentWithdrawMethod === 'ton') {
+                const tonBalance = currentBalanceEGP / exchangeRates.ton_to_egp;
+                withdrawBalanceSpan.innerHTML = tonBalance.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+                if (currencyLabel) currencyLabel.innerHTML = 'TON 💎';
+            }
         }
         
         function updateWithdrawHints() {
@@ -844,7 +857,6 @@
             const vfcashDiv = document.getElementById('withdraw_vfcash');
             const binanceDiv = document.getElementById('withdraw_binance');
             const tonDiv = document.getElementById('withdraw_ton');
-            const currencyLabel = document.getElementById('withdraw-currency-label');
             
             if (vfcashBtn) vfcashBtn.classList.remove('active');
             if (binanceBtn) binanceBtn.classList.remove('active');
@@ -856,18 +868,17 @@
             if (method === 'vfcash') {
                 if (vfcashBtn) vfcashBtn.classList.add('active');
                 if (vfcashDiv) vfcashDiv.style.display = 'block';
-                if (currencyLabel) currencyLabel.innerHTML = 'EGP 🇪🇬';
             } else if (method === 'binance') {
                 if (binanceBtn) binanceBtn.classList.add('active');
                 if (binanceDiv) binanceDiv.style.display = 'block';
-                if (currencyLabel) currencyLabel.innerHTML = 'USDT 💵';
                 updateWithdrawHints();
             } else if (method === 'ton') {
                 if (tonBtn) tonBtn.classList.add('active');
                 if (tonDiv) tonDiv.style.display = 'block';
-                if (currencyLabel) currencyLabel.innerHTML = 'TON 💎';
                 updateWithdrawHints();
             }
+            
+            updateWithdrawDisplay();
         }
         
         function submitWithdraw() {
@@ -894,8 +905,9 @@
                 if (!receiver) { tg.showAlert("⚠️ يرجى إدخال ايدي بينانس!"); return; }
                 if (!amount || amount <= 0) { tg.showAlert("⚠️ يرجى إدخال مبلغ صحيح أكبر من صفر!"); return; }
                 amountInEGP = amount * exchangeRates.usdt_to_egp;
-                if (amountInEGP > currentBalanceEGP) {
-                    tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalanceEGP.toFixed(2)} EGP لا يكفي للسحب!\nالمبلغ المطلوب يعادل ${amountInEGP.toFixed(2)} EGP`);
+                const maxUSDT = currentBalanceEGP / exchangeRates.usdt_to_egp;
+                if (amount > maxUSDT) {
+                    tg.showAlert(`⚠️ عذراً، الحد الأقصى المتاح للسحب هو ${maxUSDT.toFixed(4)} USDT`);
                     return;
                 }
             } else if (currentWithdrawMethod === "ton") {
@@ -905,8 +917,9 @@
                 if (!receiver) { tg.showAlert("⚠️ يرجى إدخال عنوان محفظة تون كيبر!"); return; }
                 if (!amount || amount <= 0) { tg.showAlert("⚠️ يرجى إدخال مبلغ صحيح أكبر من صفر!"); return; }
                 amountInEGP = amount * exchangeRates.ton_to_egp;
-                if (amountInEGP > currentBalanceEGP) {
-                    tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalanceEGP.toFixed(2)} EGP لا يكفي للسحب!\nالمبلغ المطلوب يعادل ${amountInEGP.toFixed(2)} EGP`);
+                const maxTON = currentBalanceEGP / exchangeRates.ton_to_egp;
+                if (amount > maxTON) {
+                    tg.showAlert(`⚠️ عذراً، الحد الأقصى المتاح للسحب هو ${maxTON.toFixed(6)} TON`);
                     return;
                 }
             }
