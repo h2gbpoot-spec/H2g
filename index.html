@@ -1353,7 +1353,6 @@
                 }
             }
             
-            // 🛑 تحديث الرصيد فوراً في جميع الشاشات
             const oldBalance = currentBalanceEGP;
             currentBalanceEGP -= amountInEGP;
             if (currentBalanceEGP < 0) currentBalanceEGP = 0;
@@ -1818,7 +1817,6 @@
         tg.ready();
         initProfile();
         
-        // تحديث الأسعار تلقائياً كل 5 دقائق
         setInterval(() => {
             fetchExchangeRates();
         }, 300000);
