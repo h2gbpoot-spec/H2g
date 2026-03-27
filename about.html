@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>عن البوت | صرافة جوسكار</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #050505;
+            color: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            max-width: 550px;
+            margin: 0 auto;
+            background: #111111;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 28px;
+            padding: 28px 22px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+        }
+        .greeting {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #00E6FF;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+        .greeting i {
+            font-size: 28px;
+        }
+        .section {
+            margin: 24px 0;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #00E6FF;
+        }
+        .section-text {
+            color: #8892A6;
+            line-height: 1.7;
+            font-size: 15px;
+            padding-right: 10px;
+            border-right: 2px solid rgba(0,230,255,0.3);
+            padding-right: 12px;
+        }
+        .highlight {
+            color: #00E6FF;
+            font-weight: 700;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #4a5568;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 18px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,230,255,0.1);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: #00E6FF;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 20px;
+            transition: 0.2s;
+        }
+        .back-link:hover {
+            background: rgba(0,230,255,0.2);
+        }
+        @media (prefers-color-scheme: light) {
+            body { background: #F4F7F6; color: #1A202C; }
+            .card { background: #FFFFFF; border-color: rgba(0,0,0,0.08); }
+            .section-text { color: #4A5568; border-right-color: #CBD5E0; }
+            .footer { color: #A0AEC0; border-top-color: #E2E8F0; }
+            .greeting { border-bottom-color: #E2E8F0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="greeting">
+            <i class="fa-regular fa-hand-peace"></i>
+            <span id="welcomeMessage">مرحبا بك في بوت صرافة جوسكار</span>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><i class="fa-regular fa-circle-question"></i> ما الذي يفعله البوت؟</div>
+            <div class="section-text">
+                البوت يسهل عليك التعامل مع الآخرين.<br>
+                <span class="highlight">كيف؟</span> البوت يستلم المال من بعض العملات والمحافظ تلقائياً. يعني إذا طرفك لديه عملة ليست معك، تدخل للبوت وتأخذ المحفظة التي لدى الطرف الآخر، وسيتم التحقق من استلام المال تلقائياً. بعد ذلك انت يمكنك سحب المال بالمحفظة التي لديك.
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><i class="fa-regular fa-coins"></i> هل هذا يأخذ عمولات؟</div>
+            <div class="section-text">
+                نعم هذا يأخذ عمولات ولكن عمولات لا تذكر، وفي بعض الوقت التعامل سيكون مجاناً بشكل كامل.
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><i class="fa-regular fa-infinity"></i> هل لدي حد أقصى للتعاملات؟</div>
+            <div class="section-text">
+                لا ليس لديك حد أقصى، لديك عدد غير محدود من التعاملات.
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><i class="fa-regular fa-money-bill-transfer"></i> كيف سأستلم المال الخاص بي؟</div>
+            <div class="section-text">
+                ستعمل طلب سحب وتختار المحفظة الخاصة بك وتضيف معلوماتك، وسيتم التحويل لك فور استلام المشرف. لأن قسم السحب التلقائي يدوي وليس تلقائي لأسباب قانونية.
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title"><i class="fa-regular fa-chart-line"></i> ما الحد الأدنى لإضافة المال في البوت؟</div>
+            <div class="section-text">
+                <span class="highlight">🇪🇬 الجنيه المصري:</span> 2 جنيهاً<br>
+                <span class="highlight">💵 الدولار USDT:</span> 0.3 دولار<br>
+                <span class="highlight">💎 عملة التون TON:</span> 0.03 تون
+            </div>
+        </div>
+
+        <div class="footer">
+            <i class="fa-regular fa-copyright"></i> حقوق البوت محفوظة لسنة 2026
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="javascript:history.back()" class="back-link"><i class="fa-solid fa-arrow-right"></i> العودة للتطبيق</a>
+        </div>
+    </div>
+
+    <script>
+        // الحصول على اسم المستخدم من رابط الصفحة (مثال: about.html?name=أحمد)
+        const urlParams = new URLSearchParams(window.location.search);
+        let userName = urlParams.get('name');
+        if (userName) {
+            userName = decodeURIComponent(userName);
+            document.getElementById('welcomeMessage').innerHTML = `مرحباً بك ${userName} في بوت صرافة جوسكار`;
+        } else {
+            // إذا لم يتم تمرير الاسم، نعرض الترحيب الافتراضي
+            document.getElementById('welcomeMessage').innerHTML = `مرحباً بك في بوت صرافة جوسكار`;
+        }
+    </script>
+</body>
+</html>
