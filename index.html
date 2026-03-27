@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>تطبيق صرافة جوسكار</title>
+    <title>تطبيق صرافة جوسكار - تون كوين</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -339,7 +339,6 @@
             border-radius: 12px; 
         }
 
-        /* Withdrawal Requests Tabs */
         .withdraw-tabs {
             display: flex;
             gap: 15px;
@@ -1155,6 +1154,28 @@
         let pendingWithdrawals = [];
         let successWithdrawals = [];
         
+        // جلب سعر التون من KuCoin API
+        async function fetchTONRateFromKuCoin() {
+            try {
+                const response = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=TON-USDT');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.code === "200000" && data.data && data.data.price) {
+                        const tonUsdt = parseFloat(data.data.price);
+                        // حساب سعر التون بالجنيه المصري باستخدام سعر الدولار الحالي
+                        exchangeRates.ton_to_egp = tonUsdt * exchangeRates.usdt_to_egp;
+                        console.log(`تم جلب سعر TON من KuCoin: ${tonUsdt} USDT = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`);
+                        return true;
+                    }
+                }
+                console.error('فشل في جلب سعر TON من KuCoin');
+                return false;
+            } catch (error) {
+                console.error('خطأ في اتصال KuCoin:', error);
+                return false;
+            }
+        }
+        
         async function fetchUSDRate() {
             try {
                 const response = await fetch('https://cdn.moneyconvert.net/api/latest.json');
@@ -1170,26 +1191,6 @@
             }
         }
         
-        async function fetchTONRate() {
-            try {
-                const response = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=TON-USDT');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.code === "200000" && data.data && data.data.price) {
-                        const tonUsdt = parseFloat(data.data.price);
-                        exchangeRates.ton_to_egp = tonUsdt * exchangeRates.usdt_to_egp;
-                        console.log(`TON Price: ${tonUsdt} USDT = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`);
-                    } else {
-                        console.error('خطأ في استجابة KuCoin:', data);
-                    }
-                } else {
-                    console.error('فشل الاتصال بـ KuCoin API');
-                }
-            } catch (error) {
-                console.error('خطأ في جلب سعر التون من KuCoin:', error);
-            }
-        }
-        
         async function fetchExchangeRates() {
             try {
                 const usdtRateElem = document.getElementById('rate-usdt');
@@ -1198,7 +1199,7 @@
                 if (tonRateElem) tonRateElem.innerHTML = '<span class="loading-spinner"></span>';
                 
                 await fetchUSDRate();
-                await fetchTONRate();
+                await fetchTONRateFromKuCoin(); // استخدام API كوين كوين للحصول على سعر التون الحقيقي
                 
                 if (usdtRateElem) usdtRateElem.innerHTML = `1 USDT = ${exchangeRates.usdt_to_egp.toFixed(2)} EGP`;
                 if (tonRateElem) tonRateElem.innerHTML = `1 TON = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`;
@@ -1359,12 +1360,12 @@
                 }
             }
             
-            // خصم المبلغ من الرصيد فوراً
+            // خصم المبلغ من الرصيد فوراً وتحديث جميع الشاشات
             const oldBalance = currentBalanceEGP;
             currentBalanceEGP -= amountInEGP;
             if (currentBalanceEGP < 0) currentBalanceEGP = 0;
             
-            // تحديث جميع الشاشات التي تعرض الرصيد
+            // تحديث جميع الشاشات التي تعرض الرصيد (الصفحة الرئيسية، شحن، سحب، النشاط)
             updateAllBalances();
             
             // إضافة طلب السحب إلى قائمة المعلقة
@@ -1564,7 +1565,6 @@
 
         function setLang(lang, element) {
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-            
             if (lang === 'en') {
                 const currentParams = new URLSearchParams(window.location.search);
                 window.location.href = 'en.html?' + currentParams.toString();
@@ -1831,4 +1831,4 @@
         }, 300000);
     </script>
 </body>
-    </html>
+                                                                                          </html>
