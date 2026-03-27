@@ -722,6 +722,7 @@
 
     <div class="container">
         
+        <!-- Screen Settings -->
         <div id="screen-settings" class="screen active">
             <div class="card profile-header">
                 <div class="profile-info">
@@ -828,6 +829,7 @@
             </div>
         </div>
 
+        <!-- Screen Topup -->
         <div id="screen-topup" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد الحالي بالمحفظة</div>
@@ -902,6 +904,7 @@
             </div>
         </div>
 
+        <!-- Screen Withdraw -->
         <div id="screen-withdraw" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح بالسحب</div>
@@ -983,6 +986,7 @@
             </button>
         </div>
 
+        <!-- Screen Withdrawal Requests -->
         <div id="screen-ads" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-money-bill-transfer"></i></div>
@@ -1013,6 +1017,7 @@
             </div>
         </div>
 
+        <!-- Screen Activity -->
         <div id="screen-activity" class="screen">
             <div class="grid-options" style="margin-bottom: 15px; margin-top: 10px;">
                 <div class="option-box active" id="btn-tab-ranks" onclick="switchActivityTab('ranks')">
@@ -1057,6 +1062,7 @@
             <div id="content-ads" style="display: none; animation: fadeIn 0.3s;"></div>
         </div>
 
+        <!-- Screen Admin -->
         <div id="screen-admin" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-calendar-days"></i></div>
@@ -1149,6 +1155,7 @@
         let pendingWithdrawals = [];
         let successWithdrawals = [];
         
+        // جلب سعر الدولار من API خارجي
         async function fetchUSDRate() {
             try {
                 const response = await fetch('https://cdn.moneyconvert.net/api/latest.json');
@@ -1164,6 +1171,7 @@
             }
         }
         
+        // جلب سعر التون من API KuCoin (بناءً على طلبك)
         async function fetchTONRate() {
             try {
                 const response = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=TON-USDT');
@@ -1215,6 +1223,7 @@
             }
         }
         
+        // تحديث جميع الشاشات التي تعرض الرصيد
         function updateAllBalances() {
             const balanceEgp = document.getElementById('balance-egp');
             const userBalance = document.getElementById('user-balance');
@@ -1310,6 +1319,7 @@
             updateWithdrawDisplay();
         }
         
+        // دالة السحب: يتم خصم المبلغ فوراً وتحديث جميع الشاشات
         function submitWithdraw() {
             let amount = 0;
             let receiver = "";
@@ -1353,12 +1363,15 @@
                 }
             }
             
+            // خصم المبلغ من الرصيد فوراً
             const oldBalance = currentBalanceEGP;
             currentBalanceEGP -= amountInEGP;
             if (currentBalanceEGP < 0) currentBalanceEGP = 0;
             
+            // تحديث جميع الشاشات التي تعرض الرصيد
             updateAllBalances();
             
+            // إضافة طلب السحب إلى قائمة المعلقة
             const newWithdrawRequest = {
                 id: Date.now(),
                 amount: amount,
