@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق صرافة جوسكار - تحديث السحب</title>
+    <title>بوت صرافة جوسكار - نظام متكامل</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -191,18 +191,18 @@
         .copy-badge:active { transform: scale(0.9); background: rgba(0, 230, 255, 0.2); }
         .copy-badge i { font-size: 14px; transition: color 0.3s; }
 
-        .ad-package {
+        .exchange-option {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px; border: 1px solid var(--border-color); border-radius: 14px;
             margin-bottom: 10px; cursor: pointer; transition: all 0.2s ease; background: var(--bg-card);
         }
-        .ad-package:active { transform: scale(0.98); }
-        .ad-package.active { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 230, 255, 0.15); }
-        .ad-details strong { display: block; font-size: 15px; }
-        .ad-details span { font-size: 12px; color: var(--text-muted); }
-        .ad-price { text-align: left; }
-        .ad-price .egp { font-size: 16px; font-weight: 800; color: var(--accent-cyan); display: block; }
-        .ad-price .usdt { font-size: 12px; color: var(--text-muted); }
+        .exchange-option:active { transform: scale(0.98); }
+        .exchange-option.active { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 230, 255, 0.15); }
+        .exchange-details strong { display: block; font-size: 15px; }
+        .exchange-details span { font-size: 12px; color: var(--text-muted); }
+        .exchange-rate-info { text-align: left; }
+        .exchange-rate-info .rate { font-size: 16px; font-weight: 800; color: var(--accent-cyan); display: block; }
+        .exchange-rate-info .currency { font-size: 12px; color: var(--text-muted); }
 
         .input-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 15px; width: 100%; box-sizing: border-box; color: var(--text-main); font-family: inherit; font-size: 14px; outline: none; margin-bottom: 15px; transition: 0.3s; }
         .input-box:focus { border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(0,230,255,0.1); }
@@ -301,21 +301,44 @@
             margin-left: 5px;
         }
         
-        /* زر التأكيد للمشرف */
-        .confirm-btn {
-            background: linear-gradient(90deg, #34C759, #2E7D32);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
+        .withdraw-request-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
         }
         
-        .confirm-btn:active {
-            transform: scale(0.95);
+        .withdraw-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .withdraw-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .withdraw-value {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+        
+        .exchange-history-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .exchange-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -385,13 +408,13 @@
             <div class="grid-options" id="theme-options"><div class="option-box active" onclick="setTheme('dark', this)"><div class="option-icon"><i class="fa-solid fa-moon"></i></div><div class="option-text">معتم</div></div><div class="option-box" onclick="setTheme('light', this)"><div class="option-icon"><i class="fa-solid fa-sun"></i></div><div class="option-text">فاتح</div></div></div>
 
             <div class="section-header"><div class="section-icon"><i class="fa-solid fa-chart-line"></i></div><div class="section-title">الإحصائيات العامة</div></div>
-            <div class="stats-grid"><div class="stat-card"><div class="stat-info"><span>عدد المستخدمين</span><strong id="real-users-count">0</strong></div><div class="stat-icon"><i class="fa-solid fa-users"></i></div></div><div class="stat-card"><div class="stat-info"><span>عدد الاعلانات</span><strong id="real-ads-count">0</strong></div><div class="stat-icon"><i class="fa-solid fa-bullhorn"></i></div></div></div>
+            <div class="stats-grid"><div class="stat-card"><div class="stat-info"><span>عدد المستخدمين</span><strong id="real-users-count">0</strong></div><div class="stat-icon"><i class="fa-solid fa-users"></i></div></div><div class="stat-card"><div class="stat-info"><span>عمليات الصرافة</span><strong id="real-exchange-count">0</strong></div><div class="stat-icon"><i class="fa-solid fa-exchange-alt"></i></div></div></div>
 
             <div class="section-header"><div class="section-icon"><i class="fa-solid fa-globe"></i></div><div class="section-title">المجتمع</div></div>
             <div class="card" style="padding: 0;"><a href="https://t.me/joskar" target="_blank" class="community-link"> قناة البوت <i class="fa-solid fa-arrow-up-right-from-square"></i></a><a href="https://t.me/YA55ENI" target="_blank" class="community-link"> جروب البوت <i class="fa-solid fa-arrow-up-right-from-square"></i></a><a href="https://t.me/peee_e" target="_blank" class="community-link">المطور <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div>
         </div>
 
-        <!-- شاشة الشحن (نفس الكود الأصلي لم يتم التعديل عليه) -->
+        <!-- شاشة الشحن -->
         <div id="screen-topup" class="screen">
             <div class="card" style="text-align: center;"><div style="color: var(--text-muted);">الرصيد الحالي</div><div style="font-size: 40px; font-weight: 800; color: var(--accent-cyan);"><span id="user-balance">0.00</span> <span style="font-size: 16px;">EGP</span></div></div>
             <input type="number" id="topup_amount" class="input-box" placeholder="أدخل المبلغ المراد شحنه">
@@ -402,7 +425,7 @@
             <button class="btn-primary" onclick="submitTopup()">تأكيد طلب الشحن</button>
         </div>
 
-        <!-- شاشة السحب (تم إضافة زر التأكيد فقط للمشرفين مع الحفاظ على نفس التصميم) -->
+        <!-- شاشة السحب -->
         <div id="screen-withdraw" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح بالسحب</div>
@@ -474,26 +497,95 @@
             </button>
         </div>
 
-        <!-- شاشة الإعلانات (نفس الكود الأصلي) -->
-        <div id="screen-ads" class="screen">
-            <div class="section-header"><div class="section-icon"><i class="fa-solid fa-bullhorn"></i></div><div class="section-title">اختر نوع الإعلان</div></div>
-            <div class="card ad-package" id="type-promo" onclick="toggleAdType('promo')"><div class="ad-details"><strong>إعلان ترويجي ✨</strong><span>(بوت، قناة، مسابقة)</span></div></div>
-            <div id="promo-list" style="display: none; margin-bottom: 20px;"><div id="promo-ads"></div><button class="btn-primary" onclick="submitAd()">حجز إعلان ترويجي</button></div>
-            <div class="card ad-package" id="type-super" onclick="toggleAdType('super')"><div class="ad-details"><strong>إعلان عادي ⚡</strong><span>(إعلان لشغلك)</span></div></div>
-            <div id="super-list" style="display: none; margin-bottom: 20px;"><div id="superton-ads"></div><button class="btn-primary" onclick="submitAd()">حجز إعلان عادي</button></div>
+        <!-- شاشة الصرافة (بدلاً من الإعلانات) -->
+        <div id="screen-exchange" class="screen">
+            <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-exchange-alt"></i></div>
+                <div class="section-title">خدمات الصرافة</div>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 20px; margin-bottom: 10px;">🔄 تحويل العملات</div>
+                <div style="color: var(--text-muted); font-size: 12px;">حوّل بين العملات المختلفة بأسعار تنافسية</div>
+            </div>
+            
+            <div class="exchange-option" onclick="showExchangeForm('sell')">
+                <div class="exchange-details">
+                    <strong>💱 بيع عملة</strong>
+                    <span>قم ببيع عملاتك بأسعار ممتازة</span>
+                </div>
+                <div class="exchange-rate-info">
+                    <span class="rate"><i class="fa-solid fa-arrow-left"></i> تحويل</span>
+                </div>
+            </div>
+            
+            <div class="exchange-option" onclick="showExchangeForm('buy')">
+                <div class="exchange-details">
+                    <strong>💰 شراء عملة</strong>
+                    <span>قم بشراء العملات التي تحتاجها</span>
+                </div>
+                <div class="exchange-rate-info">
+                    <span class="rate"><i class="fa-solid fa-arrow-right"></i> تحويل</span>
+                </div>
+            </div>
+            
+            <div id="exchange-form-container" style="display: none; margin-top: 15px;">
+                <div class="card">
+                    <select id="exchange_from" class="input-box" onchange="updateExchangeHint()">
+                        <option value="EGP">جنيه مصري EGP</option>
+                        <option value="USDT">دولار USDT</option>
+                        <option value="TON">تون كوين TON</option>
+                    </select>
+                    
+                    <select id="exchange_to" class="input-box" onchange="updateExchangeHint()">
+                        <option value="USDT">دولار USDT</option>
+                        <option value="EGP">جنيه مصري EGP</option>
+                        <option value="TON">تون كوين TON</option>
+                    </select>
+                    
+                    <input type="number" id="exchange_amount" class="input-box" placeholder="المبلغ المراد تحويله" oninput="updateExchangeHint()">
+                    
+                    <div id="exchange-hint" class="conversion-hint">
+                        🔄 اختر العملات والمبلغ لعرض السعر
+                    </div>
+                    
+                    <button class="btn-primary" onclick="submitExchange()">
+                        <i class="fa-solid fa-exchange-alt"></i> تنفيذ عملية الصرافة
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- شاشة النشاط (نفس الكود الأصلي) -->
+        <!-- شاشة النشاط -->
         <div id="screen-activity" class="screen">
-            <div class="grid-options"><div class="option-box active" onclick="switchActivityTab('ranks')"><i class="fa-solid fa-ranking-star"></i> الطبقات</div><div class="option-box" onclick="switchActivityTab('ads')"><i class="fa-solid fa-clock-rotate-left"></i> إعلاناتي</div></div>
-            <div id="content-ranks" style="display:block;"><div class="card" style="text-align:center"><div id="activity-rank-badge" style="margin-bottom:15px"></div><p>إجمالي إعلاناتك: <span id="activity-ads-count" style="color:var(--accent-cyan); font-size:20px;">0</span></p></div><div class="card"><div class="section-title">نظام الطبقات</div><div>برونزي: 0-5 | فضي: 6-20 | ذهبي: 21-50 | ماسي: 50+</div></div></div>
-            <div id="content-ads" style="display:none;"></div>
+            <div class="grid-options">
+                <div class="option-box active" onclick="switchActivityTab('exchange')">
+                    <i class="fa-solid fa-clock-rotate-left"></i> عمليات الصرافة
+                </div>
+                <div class="option-box" onclick="switchActivityTab('withdrawals')">
+                    <i class="fa-solid fa-money-bill-transfer"></i> طلبات السحب
+                </div>
+            </div>
+            <div id="content-exchange" style="display:block;">
+                <div class="card">
+                    <div class="section-title">آخر عمليات الصرافة</div>
+                    <div id="exchange-history" style="margin-top: 10px;">
+                        <div style="text-align: center; color: var(--text-muted); padding: 20px;">لا توجد عمليات صرافة حتى الآن</div>
+                    </div>
+                </div>
+            </div>
+            <div id="content-withdrawals" style="display:none;">
+                <div class="card">
+                    <div class="section-title">طلبات السحب السابقة</div>
+                    <div id="withdrawals-list" style="margin-top: 10px;">
+                        <div style="text-align: center; color: var(--text-muted); padding: 20px;">لا توجد طلبات سحب</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- شاشة الإدارة (تم إضافة قسم طلبات السحب للمشرفين) -->
+        <!-- شاشة الإدارة -->
         <div id="screen-admin" class="screen">
-            <div class="section-header"><div class="section-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div class="section-title">طلبات السحب المعلقة</div></div>
-            <div id="pending-withdrawals-list"></div>
             <div class="section-header"><div class="section-icon"><i class="fa-solid fa-calendar-days"></i></div><div class="section-title">إدارة المشرفين</div></div>
             <div class="card"><div class="day-row"><div class="day-label">السبت</div><input type="text" id="med_sat_1" class="day-input"><input type="text" id="med_sat_2" class="day-input"></div><button class="btn-primary" onclick="saveMediators()">حفظ المشرفين</button></div>
         </div>
@@ -503,7 +595,7 @@
         <div class="nav-item active" id="nav-settings" onclick="switchTab('settings')"><i class="fa-solid fa-gear"></i> الإعدادات</div>
         <div class="nav-item" id="nav-topup" onclick="switchTab('topup')"><i class="fa-solid fa-wallet"></i> شحن</div>
         <div class="nav-item" id="nav-withdraw" onclick="switchTab('withdraw')"><i class="fa-solid fa-money-bill-transfer"></i> سحب</div>
-        <div class="nav-item" id="nav-ads" onclick="switchTab('ads')"><i class="fa-solid fa-plus-square"></i> إعلان</div>
+        <div class="nav-item" id="nav-exchange" onclick="switchTab('exchange')"><i class="fa-solid fa-exchange-alt"></i> صرافة</div>
         <div class="nav-item" id="nav-activity" onclick="switchTab('activity')"><i class="fa-solid fa-list-check"></i> نشاطي</div>
         <div class="nav-item" id="nav-admin" style="display: none;" onclick="switchTab('admin')"><i class="fa-solid fa-crown"></i> الإدارة</div>
     </div>
@@ -515,20 +607,17 @@
         let currentWithdrawMethod = 'vfcash';
         let currentBalanceEGP = 0;
         let currentPayment = 'vfcash';
-        let selectedAd = 'promotional_1h';
+        let exchangeHistory = [];
+        let userWithdrawals = [];
         
         let exchangeRates = { usdt_to_egp: 48.5, ton_to_egp: 185 };
         
-        // تخزين طلبات السحب
-        let pendingWithdrawals = [];
-        
-        // جلب الأسعار من الـ APIs المطلوبة
+        // جلب الأسعار من الـ APIs
         async function fetchExchangeRates() {
             try {
                 document.getElementById('rate-usdt').innerHTML = '<span class="loading-spinner"></span>';
                 document.getElementById('rate-ton').innerHTML = '<span class="loading-spinner"></span>';
                 
-                // API 1: سعر الدولار مقابل الجنيه
                 const dollarRes = await fetch('https://cdn.moneyconvert.net/api/latest.json');
                 if (dollarRes.ok) {
                     const dollarData = await dollarRes.json();
@@ -537,7 +626,6 @@
                     }
                 }
                 
-                // API 2: سعر TON مقابل USDT من Kucoin
                 const tonRes = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=TON-USDT');
                 if (tonRes.ok) {
                     const tonData = await tonRes.json();
@@ -547,7 +635,6 @@
                     }
                 }
                 
-                // تحديث العرض
                 document.getElementById('rate-usdt').innerHTML = `1 USDT = ${exchangeRates.usdt_to_egp.toFixed(2)} EGP`;
                 document.getElementById('rate-ton').innerHTML = `1 TON = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`;
                 if(document.getElementById('usdt-rate-display')) document.getElementById('usdt-rate-display').innerHTML = exchangeRates.usdt_to_egp.toFixed(2);
@@ -587,7 +674,123 @@
             tg.showAlert('✅ تم تحديث أسعار الصرف بنجاح!');
         }
         
-        // تحديث النص التحويلي عند كتابة المبلغ في بينانس
+        function showExchangeForm(type) {
+            const container = document.getElementById('exchange-form-container');
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                if (type === 'sell') {
+                    document.getElementById('exchange_from').value = 'EGP';
+                    document.getElementById('exchange_to').value = 'USDT';
+                } else {
+                    document.getElementById('exchange_from').value = 'USDT';
+                    document.getElementById('exchange_to').value = 'EGP';
+                }
+                updateExchangeHint();
+            } else {
+                container.style.display = 'none';
+            }
+        }
+        
+        function updateExchangeHint() {
+            let fromCurrency = document.getElementById("exchange_from").value;
+            let toCurrency = document.getElementById("exchange_to").value;
+            let amount = parseFloat(document.getElementById("exchange_amount").value);
+            let hintDiv = document.getElementById("exchange-hint");
+            
+            if (!isNaN(amount) && amount > 0) {
+                let result = calculateExchange(amount, fromCurrency, toCurrency);
+                hintDiv.innerHTML = `💱 ${amount.toFixed(2)} ${fromCurrency} = ${result.toFixed(4)} ${toCurrency}<br>📊 سيتم خصم ${amount.toFixed(2)} ${fromCurrency} من رصيدك وإضافة ${result.toFixed(4)} ${toCurrency}`;
+            } else {
+                hintDiv.innerHTML = `🔄 أدخل المبلغ لعرض سعر التحويل`;
+            }
+        }
+        
+        function calculateExchange(amount, from, to) {
+            let amountInEGP = amount;
+            if (from === 'USDT') amountInEGP = amount * exchangeRates.usdt_to_egp;
+            else if (from === 'TON') amountInEGP = amount * exchangeRates.ton_to_egp;
+            
+            if (to === 'USDT') return amountInEGP / exchangeRates.usdt_to_egp;
+            else if (to === 'TON') return amountInEGP / exchangeRates.ton_to_egp;
+            else return amountInEGP;
+        }
+        
+        function submitExchange() {
+            let fromCurrency = document.getElementById("exchange_from").value;
+            let toCurrency = document.getElementById("exchange_to").value;
+            let amount = parseFloat(document.getElementById("exchange_amount").value);
+            
+            if (!amount || amount <= 0) {
+                tg.showAlert("⚠️ يرجى إدخال مبلغ صحيح!");
+                return;
+            }
+            
+            let amountInEGP = amount;
+            if (fromCurrency === 'USDT') amountInEGP = amount * exchangeRates.usdt_to_egp;
+            else if (fromCurrency === 'TON') amountInEGP = amount * exchangeRates.ton_to_egp;
+            
+            if (amountInEGP > currentBalanceEGP) {
+                tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalanceEGP.toFixed(2)} EGP لا يكفي للتحويل!`);
+                return;
+            }
+            
+            let result = calculateExchange(amount, fromCurrency, toCurrency);
+            
+            // حفظ العملية في السجل
+            const exchangeRecord = {
+                id: Date.now(),
+                from: fromCurrency,
+                to: toCurrency,
+                amount: amount,
+                result: result,
+                date: new Date().toLocaleString(),
+                rate: fromCurrency === 'EGP' ? (toCurrency === 'USDT' ? exchangeRates.usdt_to_egp : exchangeRates.ton_to_egp) : 
+                       (fromCurrency === 'USDT' ? exchangeRates.usdt_to_egp : exchangeRates.ton_to_egp)
+            };
+            exchangeHistory.unshift(exchangeRecord);
+            updateExchangeHistory();
+            
+            tg.sendData(JSON.stringify({ 
+                action: "exchange", 
+                from: fromCurrency, 
+                to: toCurrency, 
+                amount: amount, 
+                result: result,
+                user_id: globalUserId,
+                user_name: document.getElementById('display-name').innerText
+            }));
+            
+            tg.showAlert(`✅ تم تنفيذ عملية الصرافة بنجاح!\n${amount.toFixed(2)} ${fromCurrency} = ${result.toFixed(4)} ${toCurrency}`);
+            document.getElementById('exchange-form-container').style.display = 'none';
+            document.getElementById("exchange_amount").value = '';
+            tg.close();
+        }
+        
+        function updateExchangeHistory() {
+            const container = document.getElementById('exchange-history');
+            if (exchangeHistory.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">لا توجد عمليات صرافة حتى الآن</div>';
+                return;
+            }
+            
+            container.innerHTML = exchangeHistory.map(ex => `
+                <div class="exchange-history-item">
+                    <div class="exchange-detail">
+                        <span class="withdraw-label">التحويل:</span>
+                        <span class="withdraw-value">${ex.amount.toFixed(2)} ${ex.from} → ${ex.result.toFixed(4)} ${ex.to}</span>
+                    </div>
+                    <div class="exchange-detail">
+                        <span class="withdraw-label">سعر الصرف:</span>
+                        <span class="withdraw-value">1 ${ex.from === 'EGP' ? ex.to : ex.from} = ${ex.rate.toFixed(2)} ${ex.from === 'EGP' ? 'EGP' : (ex.from === 'USDT' ? 'EGP' : 'EGP')}</span>
+                    </div>
+                    <div class="exchange-detail">
+                        <span class="withdraw-label">التاريخ:</span>
+                        <span class="withdraw-value">${ex.date}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
         function updateBinanceHint() {
             let amountUSD = parseFloat(document.getElementById("withdraw_amount_binance").value);
             let hintDiv = document.getElementById("binance-hint");
@@ -599,7 +802,6 @@
             }
         }
         
-        // تحديث النص التحويلي عند كتابة المبلغ في تون
         function updateTonHint() {
             let amountTON = parseFloat(document.getElementById("withdraw_amount_ton").value);
             let hintDiv = document.getElementById("ton-hint");
@@ -633,7 +835,8 @@
         }
         
         function submitWithdraw() {
-            let amount = 0, receiver = "", currency = "", amountInEGP = 0;
+            let amount = 0, receiver = "", currency = "";
+            let amountInEGP = 0;
             
             if (currentWithdrawMethod === "vfcash") {
                 receiver = document.getElementById("withdraw_phone").value;
@@ -661,157 +864,89 @@
                 if (amountInEGP > currentBalanceEGP) { tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalanceEGP.toFixed(2)} EGP لا يكفي!\nالمبلغ المطلوب يعادل ${amountInEGP.toFixed(2)} EGP`); return; }
             }
             
-            // خصم الرصيد فوراً
-            currentBalanceEGP -= amountInEGP;
-            updateAllBalances();
-            
-            // إنشاء طلب السحب
+            // إنشاء طلب السحب مع جميع التفاصيل
             const withdrawRequest = {
-                id: Date.now(),
+                action: "withdraw", 
+                amount: amount, 
+                amount_egp: amountInEGP,
+                currency: currency,
+                method: currentWithdrawMethod, 
+                receiver: receiver,
                 user_id: globalUserId,
-                username: document.getElementById('display-username').innerText,
                 user_name: document.getElementById('display-name').innerText,
+                user_username: tg.initDataUnsafe?.user?.username || "غير متوفر",
+                exchange_rates: {
+                    usdt_to_egp: exchangeRates.usdt_to_egp,
+                    ton_to_egp: exchangeRates.ton_to_egp
+                },
+                timestamp: new Date().toLocaleString(),
+                status: "pending"
+            };
+            
+            // حفظ الطلب في السجل المحلي
+            userWithdrawals.unshift({
+                id: Date.now(),
                 amount: amount,
                 amount_egp: amountInEGP,
                 currency: currency,
                 method: currentWithdrawMethod,
                 receiver: receiver,
                 status: 'pending',
-                created_at: new Date().toISOString()
-            };
+                date: new Date().toLocaleString()
+            });
             
-            pendingWithdrawals.push(withdrawRequest);
+            updateWithdrawalsList();
             
-            // إرسال معلومات طلب السحب إلى مجموعة المشرفين بتنسيق منسق
-            const withdrawDetails = `
-╔══════════════════════════════════════════╗
-║           🏦 طلب سحب جديد 🏦            ║
-╠══════════════════════════════════════════╣
-║ المستخدم: ${withdrawRequest.user_name}
-║ المعرف: ${withdrawRequest.user_id}
-║ اليوزر: ${withdrawRequest.username}
-║ ════════════════════════════════════════ 
-║ طريقة السحب: ${currentWithdrawMethod === 'vfcash' ? 'فودافون كاش' : (currentWithdrawMethod === 'binance' ? 'بينانس' : 'تون كيبر')}
-║ العملة: ${currency}
-║ المبلغ: ${amount.toFixed(currency === 'TON' ? 4 : 2)} ${currency}
-║ القيمة بالجنيه: ${amountInEGP.toFixed(2)} EGP
-║ جهة الاستلام: ${receiver}
-║ رقم الطلب: ${withdrawRequest.id}
-║ التاريخ: ${new Date().toLocaleString('ar-EG')}
-╚══════════════════════════════════════════╝
-
-⬇️ اضغط على الزر أدناه لتأكيد السحب ⬇️
-            `;
-            
-            // إرسال البيانات للمشرفين مع زر تأكيد
-            tg.sendData(JSON.stringify({ 
-                action: "send_withdraw_request", 
-                request: withdrawRequest,
-                details: withdrawDetails,
-                request_id: withdrawRequest.id
-            }));
-            
-            // عرض طلبات السحب في لوحة المشرفين
-            renderPendingWithdrawals();
-            
-            tg.showAlert(`✅ تم إرسال طلب السحب رقم ${withdrawRequest.id} للمشرفين بنجاح\nسيتم إشعارك عند تأكيد السحب`);
+            // إرسال الطلب للمشرفين
+            tg.sendData(JSON.stringify(withdrawRequest));
+            tg.showAlert(`✅ تم إرسال طلب السحب للمشرفين بنجاح\nسيتم إشعارك عند تأكيد الطلب`);
             tg.close();
         }
         
-        // عرض طلبات السحب المعلقة للمشرفين
-        function renderPendingWithdrawals() {
-            const container = document.getElementById('pending-withdrawals-list');
-            if (!container) return;
-            
-            if (pendingWithdrawals.length === 0) {
-                container.innerHTML = '<div class="card" style="text-align: center;">لا توجد طلبات سحب معلقة</div>';
+        function updateWithdrawalsList() {
+            const container = document.getElementById('withdrawals-list');
+            if (userWithdrawals.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">لا توجد طلبات سحب</div>';
                 return;
             }
             
-            container.innerHTML = pendingWithdrawals.map(req => `
-                <div class="card" style="margin-bottom: 15px;">
-                    <div style="margin-bottom: 10px;">
-                        <strong style="color: var(--accent-cyan);">طلب #${req.id}</strong>
-                        <span style="background: var(--warning); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 10px;">قيد المراجعة</span>
+            container.innerHTML = userWithdrawals.map(w => `
+                <div class="withdraw-request-card">
+                    <div class="withdraw-detail">
+                        <span class="withdraw-label">المبلغ:</span>
+                        <span class="withdraw-value">${w.amount.toFixed(2)} ${w.currency} (${w.amount_egp.toFixed(2)} EGP)</span>
                     </div>
-                    <div style="margin: 10px 0;">
-                        <p><i class="fa-solid fa-user"></i> المستخدم: ${req.user_name}</p>
-                        <p><i class="fa-solid fa-id-card"></i> المعرف: ${req.user_id}</p>
-                        <p><i class="fa-solid fa-at"></i> اليوزر: ${req.username}</p>
-                        <p><i class="fa-solid fa-coins"></i> المبلغ: ${req.amount.toFixed(req.currency === 'TON' ? 4 : 2)} ${req.currency}</p>
-                        <p><i class="fa-solid fa-dollar-sign"></i> القيمة: ${req.amount_egp.toFixed(2)} EGP</p>
-                        <p><i class="fa-solid fa-credit-card"></i> طريقة السحب: ${req.method === 'vfcash' ? 'فودافون كاش' : (req.method === 'binance' ? 'بينانس' : 'تون كيبر')}</p>
-                        <p><i class="fa-solid fa-receipt"></i> جهة الاستلام: ${req.receiver}</p>
-                        <p><i class="fa-regular fa-calendar"></i> التاريخ: ${new Date(req.created_at).toLocaleString('ar-EG')}</p>
+                    <div class="withdraw-detail">
+                        <span class="withdraw-label">طريقة السحب:</span>
+                        <span class="withdraw-value">${w.method === 'vfcash' ? 'فودافون كاش' : (w.method === 'binance' ? 'بينانس' : 'تون كيبر')}</span>
                     </div>
-                    <button class="confirm-btn" onclick="confirmWithdraw(${req.id})">
-                        <i class="fa-solid fa-check-circle"></i> تأكيد السحب وإشعار المستخدم
-                    </button>
+                    <div class="withdraw-detail">
+                        <span class="withdraw-label">المستلم:</span>
+                        <span class="withdraw-value">${w.receiver}</span>
+                    </div>
+                    <div class="withdraw-detail">
+                        <span class="withdraw-label">الحالة:</span>
+                        <span class="withdraw-value" style="color: ${w.status === 'pending' ? 'var(--warning)' : 'var(--success)'}">
+                            ${w.status === 'pending' ? '⏳ قيد المراجعة' : '✅ تم التنفيذ'}
+                        </span>
+                    </div>
+                    <div class="withdraw-detail">
+                        <span class="withdraw-label">التاريخ:</span>
+                        <span class="withdraw-value">${w.date}</span>
+                    </div>
                 </div>
             `).join('');
         }
         
-        // وظيفة تأكيد السحب من قبل المشرف
-        function confirmWithdraw(requestId) {
-            const request = pendingWithdrawals.find(r => r.id === requestId);
-            if (request) {
-                // إزالة الطلب من القائمة المعلقة
-                const index = pendingWithdrawals.findIndex(r => r.id === requestId);
-                if (index !== -1) pendingWithdrawals.splice(index, 1);
-                
-                // تحديث الواجهة
-                renderPendingWithdrawals();
-                
-                // إرسال إشعار للمستخدم بأنه تم سحب المال مع تفاصيل الطلب
-                const confirmationMessage = `
-✅ تم تأكيد طلب السحب الخاص بك ✅
-
-╔══════════════════════════════════════════╗
-║ رقم الطلب: ${request.id}
-║ طريقة السحب: ${request.method === 'vfcash' ? 'فودافون كاش' : (request.method === 'binance' ? 'بينانس' : 'تون كيبر')}
-║ العملة: ${request.currency}
-║ المبلغ: ${request.amount.toFixed(request.currency === 'TON' ? 4 : 2)} ${request.currency}
-║ القيمة بالجنيه: ${request.amount_egp.toFixed(2)} EGP
-║ جهة الاستلام: ${request.receiver}
-║ ════════════════════════════════════════ 
-║ ✅ تم تحويل المبلغ بنجاح
-║ 🕐 تاريخ السحب: ${new Date().toLocaleString('ar-EG')}
-╚══════════════════════════════════════════╝
-
-شكراً لاستخدامك بوت صرافة جوسكار
-                `;
-                
-                // إرسال الإشعار للمستخدم
-                tg.sendData(JSON.stringify({
-                    action: "notify_user",
-                    user_id: request.user_id,
-                    message: confirmationMessage,
-                    request_id: request.id,
-                    type: "withdraw_confirmed"
-                }));
-                
-                tg.showAlert(`✅ تم تأكيد سحب المبلغ للمستخدم ${request.user_name} وإشعاره بنجاح`);
-            }
-        }
-        
-        // الدوال المساعدة الأخرى (نفس الكود الأصلي)
         function switchTab(tab) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(`screen-${tab}`).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(`nav-${tab}`).classList.add('active');
-            
-            if (tab === 'admin') {
-                renderPendingWithdrawals();
-            }
         }
         
         function setPayment(method) {
             currentPayment = method;
-            document.getElementById('btn-vfcash').classList.remove('active');
-            document.getElementById('btn-binance').classList.remove('active');
-            document.getElementById('btn-ton').classList.remove('active');
-            document.getElementById(`btn-${method}`).classList.add('active');
             document.getElementById('topup_vfcash').style.display = method === 'vfcash' ? 'block' : 'none';
             document.getElementById('topup_binance').style.display = method === 'binance' ? 'block' : 'none';
             document.getElementById('topup_ton').style.display = method === 'ton' ? 'block' : 'none';
@@ -833,35 +968,76 @@
             else if (currentPayment === "binance") sender = document.getElementById("sender_binance").value;
             else if (currentPayment === "ton") sender = globalUserId;
             if (!amount) { tg.showAlert("⚠️ يرجى إدخال المبلغ!"); return; }
-            
-            // إضافة الرصيد تلقائياً
-            const amountNum = parseFloat(amount);
-            if (!isNaN(amountNum) && amountNum > 0) {
-                currentBalanceEGP += amountNum;
-                updateAllBalances();
-            }
-            
-            tg.sendData(JSON.stringify({ action: "topup", amount: amount, method: currentPayment, sender: sender, new_balance: currentBalanceEGP }));
-            tg.showAlert(`✅ تمت إضافة ${amountNum.toFixed(2)} EGP إلى رصيدك بنجاح`);
+            if (!sender && currentPayment !== "ton") { tg.showAlert("⚠️ يرجى إدخال بيانات المرسل!"); return; }
+            tg.sendData(JSON.stringify({ action: "topup", amount: amount, method: currentPayment, sender: sender }));
             tg.close();
         }
         
-        function submitAd() { tg.sendData(JSON.stringify({ action: "buy_ad", package: selectedAd })); tg.close(); }
-        function setLang(lang, el) { window.location.reload(); }
-        function setTheme(theme, el) { document.documentElement.setAttribute('data-theme', theme); document.querySelectorAll('#theme-options .option-box').forEach(e => e.classList.remove('active')); el.classList.add('active'); }
-        function toggleAdType(type) { document.getElementById('promo-list').style.display = type === 'promo' ? 'block' : 'none'; document.getElementById('super-list').style.display = type === 'super' ? 'block' : 'none'; }
-        function switchActivityTab(tab) { document.getElementById('content-ranks').style.display = tab === 'ranks' ? 'block' : 'none'; document.getElementById('content-ads').style.display = tab === 'ads' ? 'block' : 'none'; }
-        function verifyAdmin() { let u=document.getElementById('admin_user').value, p=document.getElementById('admin_pass').value; if(u==='mazen' && p==='292002') { closeAdminModal(); document.getElementById('nav-admin').style.display='block'; switchTab('admin'); } else tg.showAlert("❌ بيانات خاطئة"); }
-        function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
-        function saveMediators() { tg.sendData(JSON.stringify({ action: "admin_save_mediators" })); tg.close(); }
-        let tapCount=0, tapTimer; function secretAdminTap() { tapCount++; clearTimeout(tapTimer); tapTimer=setTimeout(()=>{tapCount=0},2000); if(tapCount>=5){document.getElementById('admin-modal').style.display='flex'; tapCount=0;} }
+        function setLang(lang, el) { 
+            if(lang === 'ar') {
+                tg.showAlert("اللغة العربية");
+            } else {
+                tg.showAlert("English Language");
+            }
+        }
         
-        function updateUserRank(adsCount) {
-            let count = parseInt(adsCount) || 0;
-            let badgeHTML = count <=5 ? '<span class="badge badge-bronze"><i class="fa-solid fa-medal"></i> برونزي</span>' : (count<=20 ? '<span class="badge badge-silver"><i class="fa-solid fa-award"></i> فضي</span>' : (count<=50 ? '<span class="badge badge-gold"><i class="fa-solid fa-crown"></i> ذهبي</span>' : '<span class="badge badge-diamond"><i class="fa-solid fa-gem"></i> ماسي</span>'));
+        function setTheme(theme, el) { 
+            document.documentElement.setAttribute('data-theme', theme); 
+            document.querySelectorAll('#theme-options .option-box').forEach(e => e.classList.remove('active')); 
+            el.classList.add('active');
+            localStorage.setItem('theme', theme);
+        }
+        
+        function switchActivityTab(tab) { 
+            document.getElementById('content-exchange').style.display = tab === 'exchange' ? 'block' : 'none'; 
+            document.getElementById('content-withdrawals').style.display = tab === 'withdrawals' ? 'block' : 'none';
+        }
+        
+        function verifyAdmin() { 
+            let u = document.getElementById('admin_user').value, 
+                p = document.getElementById('admin_pass').value; 
+            if(u === 'mazen' && p === '292002') { 
+                closeAdminModal(); 
+                document.getElementById('nav-admin').style.display = 'block'; 
+                switchTab('admin'); 
+                tg.showAlert("✅ مرحبا بك في لوحة الإدارة");
+            } else { 
+                tg.showAlert("❌ بيانات الدخول غير صحيحة"); 
+            }
+        }
+        
+        function closeAdminModal() { 
+            document.getElementById('admin-modal').style.display = 'none'; 
+        }
+        
+        function saveMediators() { 
+            let mediators = {
+                sat_1: document.getElementById("med_sat_1").value,
+                sat_2: document.getElementById("med_sat_2").value
+            };
+            tg.sendData(JSON.stringify({ action: "admin_save_mediators", mediators: mediators })); 
+            tg.showAlert("✅ تم حفظ المشرفين بنجاح");
+            tg.close();
+        }
+        
+        let tapCount = 0, tapTimer; 
+        function secretAdminTap() { 
+            tapCount++; 
+            clearTimeout(tapTimer); 
+            tapTimer = setTimeout(() => { tapCount = 0; }, 2000); 
+            if(tapCount >= 5) {
+                document.getElementById('admin-modal').style.display = 'flex'; 
+                tapCount = 0;
+            }
+        }
+        
+        function updateUserRank(exchangeCount) {
+            let count = parseInt(exchangeCount) || 0;
+            let badgeHTML = count <= 5 ? '<span class="badge badge-bronze"><i class="fa-solid fa-medal"></i> برونزي</span>' : 
+                           (count <= 20 ? '<span class="badge badge-silver"><i class="fa-solid fa-award"></i> فضي</span>' : 
+                           (count <= 50 ? '<span class="badge badge-gold"><i class="fa-solid fa-crown"></i> ذهبي</span>' : 
+                           '<span class="badge badge-diamond"><i class="fa-solid fa-gem"></i> ماسي</span>'));
             document.getElementById('user-rank-container').innerHTML = badgeHTML;
-            document.getElementById('activity-rank-badge').innerHTML = badgeHTML;
-            document.getElementById('activity-ads-count').innerText = count;
         }
         
         async function initProfile() {
@@ -870,30 +1046,28 @@
             currentBalanceEGP = parseFloat(urlParams.get('balance') || '0');
             await fetchExchangeRates();
             updateAllBalances();
+            
             let urlName = urlParams.get('name');
             if(urlName) document.getElementById('display-name').innerText = decodeURIComponent(urlName);
-            let userAds = urlParams.get('user_ads') || '0';
-            updateUserRank(userAds);
+            else if(tg.initDataUnsafe?.user?.first_name) document.getElementById('display-name').innerText = tg.initDataUnsafe.user.first_name;
+            
+            let userExchanges = urlParams.get('user_exchanges') || '0';
+            updateUserRank(userExchanges);
+            
             if(document.getElementById('user-memo-display')) document.getElementById('user-memo-display').innerText = globalUserId || "غير متاح";
             if(urlParams.get('stats_users')) document.getElementById('real-users-count').innerText = urlParams.get('stats_users');
-            if(urlParams.get('stats_ads')) document.getElementById('real-ads-count').innerText = urlParams.get('stats_ads');
-        }
-        
-        // الإعلانات البسيطة
-        const promoAds = [{id:'promo_1h',hours:'1 ساعة',egp:'50'},{id:'promo_12h',hours:'12 ساعة',egp:'150'}];
-        const superAds = [{id:'normal_1h',hours:'1 ساعة',egp:'30'},{id:'normal_24h',hours:'24 ساعة',egp:'150'}];
-        function renderAds() {
-            document.getElementById('promo-ads').innerHTML = promoAds.map(ad => `<div class="ad-package" onclick="selectedAd='${ad.id}';document.querySelectorAll('#promo-ads .ad-package').forEach(e=>e.classList.remove('active'));this.classList.add('active')"><div class="ad-details"><strong>${ad.hours}</strong></div><div class="ad-price"><span class="egp">${ad.egp} EGP</span></div></div>`).join('');
-            document.getElementById('superton-ads').innerHTML = superAds.map(ad => `<div class="ad-package" onclick="selectedAd='${ad.id}';document.querySelectorAll('#superton-ads .ad-package').forEach(e=>e.classList.remove('active'));this.classList.add('active')"><div class="ad-details"><strong>${ad.hours}</strong></div><div class="ad-price"><span class="egp">${ad.egp} EGP</span></div></div>`).join('');
+            if(urlParams.get('stats_exchanges')) document.getElementById('real-exchange-count').innerText = urlParams.get('stats_exchanges');
+            
+            // تحميل الثيم المحفوظ
+            const savedTheme = localStorage.getItem('theme');
+            if(savedTheme) {
+                setTheme(savedTheme, document.querySelector(`#theme-options .option-box[onclick*="${savedTheme}"]`));
+            }
         }
         
         tg.ready();
         initProfile();
-        renderAds();
         setInterval(fetchExchangeRates, 300000);
-        
-        // جعل الدوال متاحة عالمياً
-        window.confirmWithdraw = confirmWithdraw;
     </script>
 </body>
-                                                                                                                                                                                   </html>
+</html>
