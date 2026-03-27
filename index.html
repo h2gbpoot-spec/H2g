@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>تطبيق صرافة جوسكار - تون كوين</title>
+    <title>تطبيق صرافة جوسكار</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -339,6 +339,7 @@
             border-radius: 12px; 
         }
 
+        /* Withdrawal Requests Tabs */
         .withdraw-tabs {
             display: flex;
             gap: 15px;
@@ -721,7 +722,6 @@
 
     <div class="container">
         
-        <!-- Screen Settings -->
         <div id="screen-settings" class="screen active">
             <div class="card profile-header">
                 <div class="profile-info">
@@ -828,7 +828,6 @@
             </div>
         </div>
 
-        <!-- Screen Topup -->
         <div id="screen-topup" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد الحالي بالمحفظة</div>
@@ -903,7 +902,6 @@
             </div>
         </div>
 
-        <!-- Screen Withdraw -->
         <div id="screen-withdraw" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح بالسحب</div>
@@ -985,7 +983,6 @@
             </button>
         </div>
 
-        <!-- Screen Withdrawal Requests -->
         <div id="screen-ads" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-money-bill-transfer"></i></div>
@@ -1016,7 +1013,6 @@
             </div>
         </div>
 
-        <!-- Screen Activity -->
         <div id="screen-activity" class="screen">
             <div class="grid-options" style="margin-bottom: 15px; margin-top: 10px;">
                 <div class="option-box active" id="btn-tab-ranks" onclick="switchActivityTab('ranks')">
@@ -1061,7 +1057,6 @@
             <div id="content-ads" style="display: none; animation: fadeIn 0.3s;"></div>
         </div>
 
-        <!-- Screen Admin -->
         <div id="screen-admin" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-calendar-days"></i></div>
@@ -1154,28 +1149,6 @@
         let pendingWithdrawals = [];
         let successWithdrawals = [];
         
-        // جلب سعر التون من KuCoin API
-        async function fetchTONRateFromKuCoin() {
-            try {
-                const response = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=TON-USDT');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.code === "200000" && data.data && data.data.price) {
-                        const tonUsdt = parseFloat(data.data.price);
-                        // حساب سعر التون بالجنيه المصري باستخدام سعر الدولار الحالي
-                        exchangeRates.ton_to_egp = tonUsdt * exchangeRates.usdt_to_egp;
-                        console.log(`تم جلب سعر TON من KuCoin: ${tonUsdt} USDT = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`);
-                        return true;
-                    }
-                }
-                console.error('فشل في جلب سعر TON من KuCoin');
-                return false;
-            } catch (error) {
-                console.error('خطأ في اتصال KuCoin:', error);
-                return false;
-            }
-        }
-        
         async function fetchUSDRate() {
             try {
                 const response = await fetch('https://cdn.moneyconvert.net/api/latest.json');
@@ -1191,6 +1164,26 @@
             }
         }
         
+        async function fetchTONRate() {
+            try {
+                const response = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=TON-USDT');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.code === "200000" && data.data && data.data.price) {
+                        const tonUsdt = parseFloat(data.data.price);
+                        exchangeRates.ton_to_egp = tonUsdt * exchangeRates.usdt_to_egp;
+                        console.log(`TON Price: ${tonUsdt} USDT = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`);
+                    } else {
+                        console.error('خطأ في استجابة KuCoin:', data);
+                    }
+                } else {
+                    console.error('فشل الاتصال بـ KuCoin API');
+                }
+            } catch (error) {
+                console.error('خطأ في جلب سعر التون من KuCoin:', error);
+            }
+        }
+        
         async function fetchExchangeRates() {
             try {
                 const usdtRateElem = document.getElementById('rate-usdt');
@@ -1199,7 +1192,7 @@
                 if (tonRateElem) tonRateElem.innerHTML = '<span class="loading-spinner"></span>';
                 
                 await fetchUSDRate();
-                await fetchTONRateFromKuCoin(); // استخدام API كوين كوين للحصول على سعر التون الحقيقي
+                await fetchTONRate();
                 
                 if (usdtRateElem) usdtRateElem.innerHTML = `1 USDT = ${exchangeRates.usdt_to_egp.toFixed(2)} EGP`;
                 if (tonRateElem) tonRateElem.innerHTML = `1 TON = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`;
@@ -1360,15 +1353,13 @@
                 }
             }
             
-            // خصم المبلغ من الرصيد فوراً وتحديث جميع الشاشات
+            // 🛑 تحديث الرصيد فوراً في جميع الشاشات
             const oldBalance = currentBalanceEGP;
             currentBalanceEGP -= amountInEGP;
             if (currentBalanceEGP < 0) currentBalanceEGP = 0;
             
-            // تحديث جميع الشاشات التي تعرض الرصيد (الصفحة الرئيسية، شحن، سحب، النشاط)
             updateAllBalances();
             
-            // إضافة طلب السحب إلى قائمة المعلقة
             const newWithdrawRequest = {
                 id: Date.now(),
                 amount: amount,
@@ -1565,6 +1556,7 @@
 
         function setLang(lang, element) {
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+            
             if (lang === 'en') {
                 const currentParams = new URLSearchParams(window.location.search);
                 window.location.href = 'en.html?' + currentParams.toString();
@@ -1826,9 +1818,10 @@
         tg.ready();
         initProfile();
         
+        // تحديث الأسعار تلقائياً كل 5 دقائق
         setInterval(() => {
             fetchExchangeRates();
         }, 300000);
     </script>
 </body>
-                                                                                          </html>
+</html>
