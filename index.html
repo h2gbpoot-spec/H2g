@@ -1144,7 +1144,7 @@
         tg.expand();
         let globalUserId = "";
         let currentWithdrawMethod = 'vfcash';
-        let currentBalanceEGP = 0; // الرصيد يبدأ من 0
+        let currentBalanceEGP = 0;
         let currentPayment = 'vfcash';
         
         let exchangeRates = {
@@ -1152,7 +1152,6 @@
             ton_to_egp: 185
         };
         
-        // مصفوفات الطلبات فارغة تماماً بدون بيانات وهمية
         let pendingWithdrawals = [];
         let successWithdrawals = [];
         
@@ -1536,11 +1535,20 @@
 
         function setLang(lang, element) {
             if(tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-            const parent = element.parentElement;
-            if (parent) {
-                parent.querySelectorAll('.option-box').forEach(el => el.classList.remove('active'));
+            
+            if (lang === 'en') {
+                // حفظ المعاملات الحالية من الرابط
+                const currentParams = new URLSearchParams(window.location.search);
+                // إعادة التوجيه إلى en.html مع نفس المعاملات
+                window.location.href = 'en.html?' + currentParams.toString();
+            } else {
+                // للعربية، نبقى في نفس الصفحة
+                const parent = element.parentElement;
+                if (parent) {
+                    parent.querySelectorAll('.option-box').forEach(el => el.classList.remove('active'));
+                }
+                element.classList.add('active');
             }
-            element.classList.add('active');
         }
 
         function setPayment(method) {
@@ -1702,7 +1710,6 @@
         async function initProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             globalUserId = tg.initDataUnsafe?.user?.id || urlParams.get('user_id') || '123456789';
-            // الرصيد يبدأ من 0 إذا لم يتم تمريره من البوت
             const rawBalance = urlParams.get('balance') || '0';
             currentBalanceEGP = parseFloat(rawBalance);
             
@@ -1717,7 +1724,6 @@
             let userAds = urlParams.get('user_ads') || '0';
             let urlHistory = urlParams.get('history');
             
-            // استقبال طلبات السحب من البوت (فارغة إذا لم يتم إرسالها)
             try {
                 let pendingRaw = urlParams.get('pending_withdrawals');
                 if(pendingRaw && pendingRaw !== '[]') {
@@ -1799,4 +1805,4 @@
         }, 300000);
     </script>
 </body>
-                    </html>
+    </html>
