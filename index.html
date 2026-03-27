@@ -649,7 +649,7 @@
 
     <div class="container">
 
-        <div id="screen-settings" class="screen active">
+        <div id="screen-settings" class="screen">
 
             <div class="card profile-header">
                 <div class="profile-info">
@@ -793,7 +793,7 @@
             </div>
         </div>
 
-        <!-- قسم السحب -->
+        <!-- قسم السحب (تم اصلاحه واضافة API صحيح) -->
         <div id="screen-withdraw" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح للسحب</div>
@@ -1028,13 +1028,13 @@
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" id="nav-settings" onclick="switchTab('settings')">
+        <div class="nav-item" id="nav-settings" onclick="switchTab('settings')">
             <i class="fa-solid fa-gear"></i> الإعدادات
         </div>
         <div class="nav-item" id="nav-topup" onclick="switchTab('topup')">
             <i class="fa-solid fa-wallet"></i> شحن رصيد
         </div>
-        <div class="nav-item" id="nav-withdraw" onclick="switchTab('withdraw')">
+        <div class="nav-item active" id="nav-withdraw" onclick="switchTab('withdraw')">
             <i class="fa-solid fa-money-bill-transfer"></i> سحب رصيد
         </div>
         <div class="nav-item" id="nav-ads" onclick="switchTab('ads')">
@@ -1058,7 +1058,7 @@
         let isLoadingRates = false;
         let userBalanceEGP = 0;
 
-        // جلب سعر USDT/EGP من Binance P2P
+        // جلب سعر USDT/EGP من Binance P2P (API صحيح)
         async function fetchUSDTEGPRate() {
             try {
                 const response = await fetch('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search', {
@@ -1083,18 +1083,20 @@
                         totalPrice += parseFloat(data.data[i].adv.price);
                     }
                     const avgRate = totalPrice / Math.min(5, data.data.length);
-                    document.getElementById('usdt_rate_info').innerHTML = `<i class="fa-solid fa-chart-line"></i> 1 USDT = ${avgRate.toFixed(2)} EGP`;
+                    const rateInfo = document.getElementById('usdt_rate_info');
+                    if (rateInfo) rateInfo.innerHTML = `<i class="fa-solid fa-chart-line"></i> 1 USDT = ${avgRate.toFixed(2)} EGP`;
                     return avgRate;
                 }
                 throw new Error('No data');
             } catch (error) {
                 console.error('Error fetching USDT rate:', error);
-                document.getElementById('usdt_rate_info').innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> خطأ في جلب السعر';
+                const rateInfo = document.getElementById('usdt_rate_info');
+                if (rateInfo) rateInfo.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> خطأ في جلب السعر';
                 return null;
             }
         }
 
-        // جلب سعر TON/USDT من Binance API
+        // جلب سعر TON/USDT من Binance API (API صحيح)
         async function fetchTONUSDTRate() {
             try {
                 const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=TONUSDT');
@@ -1115,8 +1117,10 @@
             isLoadingRates = true;
 
             try {
-                document.getElementById('usdt_rate_info').innerHTML = '<div class="loading-spinner"></div> جاري جلب السعر...';
-                document.getElementById('ton_rate_info').innerHTML = '<div class="loading-spinner"></div> جاري جلب السعر...';
+                const usdtRateInfo = document.getElementById('usdt_rate_info');
+                const tonRateInfo = document.getElementById('ton_rate_info');
+                if (usdtRateInfo) usdtRateInfo.innerHTML = '<div class="loading-spinner"></div> جاري جلب السعر...';
+                if (tonRateInfo) tonRateInfo.innerHTML = '<div class="loading-spinner"></div> جاري جلب السعر...';
 
                 const usdtEgp = await fetchUSDTEGPRate();
                 if (usdtEgp) {
@@ -1125,9 +1129,9 @@
                     const tonUsdt = await fetchTONUSDTRate();
                     if (tonUsdt) {
                         tonRate = tonUsdt * usdtEgp;
-                        document.getElementById('ton_rate_info').innerHTML = `<i class="fa-solid fa-chart-line"></i> 1 TON = ${tonRate.toFixed(2)} EGP`;
+                        if (tonRateInfo) tonRateInfo.innerHTML = `<i class="fa-solid fa-chart-line"></i> 1 TON = ${tonRate.toFixed(2)} EGP`;
                     } else {
-                        document.getElementById('ton_rate_info').innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> خطأ في جلب سعر TON';
+                        if (tonRateInfo) tonRateInfo.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> خطأ في جلب سعر TON';
                     }
                 }
 
@@ -1278,8 +1282,10 @@
                     </div>
                 </div>`;
 
-            document.getElementById('promo-ads').innerHTML = promoAds.map(createCard).join('');
-            document.getElementById('superton-ads').innerHTML = superTonAds.map(createCard).join('');
+            const promoDiv = document.getElementById('promo-ads');
+            const superDiv = document.getElementById('superton-ads');
+            if (promoDiv) promoDiv.innerHTML = promoAds.map(createCard).join('');
+            if (superDiv) superDiv.innerHTML = superTonAds.map(createCard).join('');
         }
 
         function selectAd(id, element) {
@@ -1396,8 +1402,10 @@
             const rawBalance = urlParams.get('balance') || '0';
             userBalanceEGP = parseFloat(rawBalance);
             const formattedBalance = userBalanceEGP.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById('user-balance').innerText = formattedBalance;
-            document.getElementById('withdraw-balance').innerText = formattedBalance;
+            const userBalanceSpan = document.getElementById('user-balance');
+            const withdrawBalanceSpan = document.getElementById('withdraw-balance');
+            if (userBalanceSpan) userBalanceSpan.innerText = formattedBalance;
+            if (withdrawBalanceSpan) withdrawBalanceSpan.innerText = formattedBalance;
 
             let urlName = urlParams.get('name');
             let urlUser = urlParams.get('username');
@@ -1430,8 +1438,10 @@
 
             if (urlName) {
                 let decodedName = decodeURIComponent(urlName);
-                document.getElementById('display-name').innerText = decodedName;
-                document.getElementById('display-username').innerText = urlUser && urlUser !== "None" ? "@" + decodeURIComponent(urlUser) : "";
+                const displayName = document.getElementById('display-name');
+                if (displayName) displayName.innerText = decodedName;
+                const displayUsername = document.getElementById('display-username');
+                if (displayUsername) displayUsername.innerText = urlUser && urlUser !== "None" ? "@" + decodeURIComponent(urlUser) : "";
 
                 const photoElem = document.getElementById('display-photo');
                 const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(decodedName)}&background=0A1931&color=00E6FF&bold=true&size=128`;
@@ -1446,15 +1456,14 @@
                     photoElem.src = fallbackAvatar;
                 }
             } else {
-                document.getElementById('display-name').innerText = "مستخدم سوبر تون";
+                const displayName = document.getElementById('display-name');
+                if (displayName) displayName.innerText = "مستخدم سوبر تون";
             }
 
-            if (document.getElementById('real-users-count') && realUsers) {
-                document.getElementById('real-users-count').innerText = Number(realUsers).toLocaleString();
-            }
-            if (document.getElementById('real-ads-count') && realAds) {
-                document.getElementById('real-ads-count').innerText = Number(realAds).toLocaleString();
-            }
+            const realUsersCount = document.getElementById('real-users-count');
+            const realAdsCount = document.getElementById('real-ads-count');
+            if (realUsersCount && realUsers) realUsersCount.innerText = Number(realUsers).toLocaleString();
+            if (realAdsCount && realAds) realAdsCount.innerText = Number(realAds).toLocaleString();
 
             if (urlMeds) {
                 try {
@@ -1490,15 +1499,11 @@
                 renderAdHistory([]);
             }
 
-            if (globalUserId) {
-                if (document.getElementById('user-memo-display')) {
-                    document.getElementById('user-memo-display').innerText = globalUserId;
-                }
-            }
+            const userMemoDisplay = document.getElementById('user-memo-display');
+            if (globalUserId && userMemoDisplay) userMemoDisplay.innerText = globalUserId;
 
-            if (!urlName) document.getElementById('display-name').innerText = "مستخدم سوبر تون";
-
-            document.getElementById('withdraw_amount').addEventListener('input', updateConvertedAmount);
+            const withdrawAmount = document.getElementById('withdraw_amount');
+            if (withdrawAmount) withdrawAmount.addEventListener('input', updateConvertedAmount);
 
             setInterval(updateExchangeRates, 5 * 60 * 1000);
         }
@@ -1546,12 +1551,15 @@
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(`screen-${tab}`).classList.add('active');
-            document.getElementById(`nav-${tab}`).classList.add('active');
+            const screen = document.getElementById(`screen-${tab}`);
+            const nav = document.getElementById(`nav-${tab}`);
+            if (screen) screen.classList.add('active');
+            if (nav) nav.classList.add('active');
 
             if (tab === 'withdraw') {
                 let balance = document.getElementById('user-balance').innerText;
-                document.getElementById('withdraw-balance').innerText = balance;
+                const withdrawBalance = document.getElementById('withdraw-balance');
+                if (withdrawBalance) withdrawBalance.innerText = balance;
                 updateConvertedAmount();
             }
         }
@@ -1559,18 +1567,24 @@
         function switchActivityTab(tab) {
             if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
 
-            document.getElementById('btn-tab-ranks').classList.remove('active');
-            document.getElementById('btn-tab-ads').classList.remove('active');
+            const ranksBtn = document.getElementById('btn-tab-ranks');
+            const adsBtn = document.getElementById('btn-tab-ads');
+            if (ranksBtn) ranksBtn.classList.remove('active');
+            if (adsBtn) adsBtn.classList.remove('active');
 
-            document.getElementById('btn-tab-ranks').querySelector('i').style.color = 'var(--text-main)';
-            document.getElementById('btn-tab-ads').querySelector('i').style.color = 'var(--text-main)';
+            if (ranksBtn && ranksBtn.querySelector('i')) ranksBtn.querySelector('i').style.color = 'var(--text-main)';
+            if (adsBtn && adsBtn.querySelector('i')) adsBtn.querySelector('i').style.color = 'var(--text-main)';
 
             let activeBtn = document.getElementById(`btn-tab-${tab}`);
-            activeBtn.classList.add('active');
-            activeBtn.querySelector('i').style.color = 'var(--accent-cyan)';
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                if (activeBtn.querySelector('i')) activeBtn.querySelector('i').style.color = 'var(--accent-cyan)';
+            }
 
-            document.getElementById('content-ranks').style.display = tab === 'ranks' ? 'block' : 'none';
-            document.getElementById('content-ads').style.display = tab === 'ads' ? 'block' : 'none';
+            const ranksContent = document.getElementById('content-ranks');
+            const adsContent = document.getElementById('content-ads');
+            if (ranksContent) ranksContent.style.display = tab === 'ranks' ? 'block' : 'none';
+            if (adsContent) adsContent.style.display = tab === 'ads' ? 'block' : 'none';
         }
 
         function setTheme(theme, element) {
@@ -1596,14 +1610,21 @@
         function setPayment(method) {
             if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
             currentPayment = method;
-            document.getElementById('btn-vfcash').classList.remove('active');
-            document.getElementById('btn-binance').classList.remove('active');
-            document.getElementById('btn-ton').classList.remove('active');
-            document.getElementById(`btn-${method}`).classList.add('active');
+            const vfBtn = document.getElementById('btn-vfcash');
+            const binanceBtn = document.getElementById('btn-binance');
+            const tonBtn = document.getElementById('btn-ton');
+            if (vfBtn) vfBtn.classList.remove('active');
+            if (binanceBtn) binanceBtn.classList.remove('active');
+            if (tonBtn) tonBtn.classList.remove('active');
+            const activeBtn = document.getElementById(`btn-${method}`);
+            if (activeBtn) activeBtn.classList.add('active');
 
-            document.getElementById('topup_vfcash').style.display = method === 'vfcash' ? 'block' : 'none';
-            document.getElementById('topup_binance').style.display = method === 'binance' ? 'block' : 'none';
-            document.getElementById('topup_ton').style.display = method === 'ton' ? 'block' : 'none';
+            const vfcashDiv = document.getElementById('topup_vfcash');
+            const binanceDiv = document.getElementById('topup_binance');
+            const tonDiv = document.getElementById('topup_ton');
+            if (vfcashDiv) vfcashDiv.style.display = method === 'vfcash' ? 'block' : 'none';
+            if (binanceDiv) binanceDiv.style.display = method === 'binance' ? 'block' : 'none';
+            if (tonDiv) tonDiv.style.display = method === 'ton' ? 'block' : 'none';
         }
 
         function copyToClipboard(text, element) {
@@ -1636,14 +1657,16 @@
                 tapCount = 0;
             }, 2000);
             if (tapCount >= 5) {
-                document.getElementById('admin-modal').style.display = 'flex';
+                const adminModal = document.getElementById('admin-modal');
+                if (adminModal) adminModal.style.display = 'flex';
                 tapCount = 0;
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             }
         }
 
         function closeAdminModal() {
-            document.getElementById('admin-modal').style.display = 'none';
+            const adminModal = document.getElementById('admin-modal');
+            if (adminModal) adminModal.style.display = 'none';
         }
 
         function verifyAdmin() {
@@ -1652,7 +1675,8 @@
             if (user === 'mazen' && pass === '292002') {
                 closeAdminModal();
                 tg.showAlert("✅ أهلاً بك يا مالك النظام!");
-                document.getElementById('nav-admin').style.display = 'block';
+                const adminNav = document.getElementById('nav-admin');
+                if (adminNav) adminNav.style.display = 'block';
                 switchTab('admin');
             } else {
                 tg.showAlert("❌ بيانات الدخول خاطئة!");
@@ -1749,4 +1773,3 @@
     </script>
 </body>
 </html>
-```
