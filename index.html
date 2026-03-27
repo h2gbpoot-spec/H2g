@@ -870,6 +870,20 @@
             margin-top: 5px;
             text-align: center;
         }
+
+        /* إضافة تنسيق لعرض العمولة */
+        .commission-details {
+            background: rgba(0, 230, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 13px;
+            text-align: center;
+        }
+        .commission-details span {
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -1068,7 +1082,7 @@
             </div>
         </div>
 
-        <!-- Screen Withdraw -->
+        <!-- Screen Withdraw (معدل لإظهار العمولة) -->
         <div id="screen-withdraw" class="screen">
             <div class="card" style="text-align: center; padding: 30px 20px;">
                 <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 10px;">الرصيد المتاح بالسحب</div>
@@ -1101,8 +1115,11 @@
             <div id="withdraw_vfcash" style="display: block;">
                 <input type="tel" id="withdraw_phone" class="input-box" placeholder="📱 رقم فودافون كاش المراد السحب إليه">
                 <div class="amount-input-wrapper">
-                    <input type="number" id="withdraw_amount_vfcash" min="1" step="any" class="input-box" placeholder="المبلغ المراد سحبه">
+                    <input type="number" id="withdraw_amount_vfcash" min="1" step="any" class="input-box" placeholder="المبلغ المراد سحبه" oninput="calculateCommission()">
                     <span class="currency-badge">EGP 🇪🇬</span>
+                </div>
+                <div id="commission-details" class="commission-details">
+                    <!-- سيتم عرض تفاصيل العمولة هنا -->
                 </div>
                 <div style="background: rgba(0, 230, 255, 0.05); border-radius: 12px; padding: 12px; margin-top: 10px;">
                     <div style="font-size: 12px; color: var(--text-muted);">
@@ -1114,9 +1131,10 @@
             <div id="withdraw_binance" style="display: none;">
                 <input type="text" id="withdraw_binance_id" class="input-box" placeholder="🆔 ايدي بينانس الخاص بك">
                 <div class="amount-input-wrapper">
-                    <input type="number" id="withdraw_amount_binance" min="0.01" step="any" class="input-box" placeholder="المبلغ بالدولار USDT">
+                    <input type="number" id="withdraw_amount_binance" min="0.01" step="any" class="input-box" placeholder="المبلغ بالدولار USDT" oninput="calculateCommission()">
                     <span class="currency-badge">USDT 💵</span>
                 </div>
+                <div id="commission-details-binance" class="commission-details"></div>
                 <div class="amount-hint" id="binance-amount-hint"></div>
                 <div style="background: rgba(0, 230, 255, 0.05); border-radius: 12px; padding: 12px; margin-top: 10px;">
                     <div style="font-size: 12px; color: var(--text-muted);">
@@ -1131,9 +1149,10 @@
             <div id="withdraw_ton" style="display: none;">
                 <input type="text" id="withdraw_ton_address" class="input-box" placeholder="🔗 عنوان محفظة تون كيبر">
                 <div class="amount-input-wrapper">
-                    <input type="number" id="withdraw_amount_ton" min="0.01" step="any" class="input-box" placeholder="المبلغ بالتون TON">
+                    <input type="number" id="withdraw_amount_ton" min="0.01" step="any" class="input-box" placeholder="المبلغ بالتون TON" oninput="calculateCommission()">
                     <span class="currency-badge">TON 💎</span>
                 </div>
+                <div id="commission-details-ton" class="commission-details"></div>
                 <div class="amount-hint" id="ton-amount-hint"></div>
                 <div style="background: rgba(0, 230, 255, 0.05); border-radius: 12px; padding: 12px; margin-top: 10px;">
                     <div style="font-size: 12px; color: var(--text-muted);">
@@ -1239,7 +1258,7 @@
             </div>
         </div>
 
-        <!-- Screen Admin -->
+        <!-- Screen Admin (مضاف إليه تعديل نسبة العمولة) -->
         <div id="screen-admin" class="screen">
             <div class="section-header">
                 <div class="section-icon"><i class="fa-solid fa-calendar-days"></i></div>
@@ -1291,6 +1310,17 @@
                 <input type="number" id="new_balance_amount" class="input-box" placeholder="الرصيد الجديد (اكتب 0 للتصفير)">
                 <button class="btn-primary" style="background: linear-gradient(90deg, #FF3B30, #C51104);" onclick="setAdminBalance()">تنفيذ وتحديث الرصيد</button>
             </div>
+
+            <!-- إضافة قسم تعديل نسبة العمولة -->
+            <div class="section-header">
+                <div class="section-icon"><i class="fa-solid fa-percent"></i></div>
+                <div class="section-title">تعديل نسبة العمولة</div>
+            </div>
+            <div class="card">
+                <input type="number" id="commission_rate" class="input-box" step="0.1" placeholder="نسبة العمولة (مثال: 0.2)" value="0.2">
+                <button class="btn-primary" style="background: linear-gradient(90deg, #00E6FF, #007BFF);" onclick="setCommissionRate()">تحديث النسبة</button>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">العمولة الحالية: <span id="current-commission-display">0.2</span>%</div>
+            </div>
         </div>
 
     </div>
@@ -1334,6 +1364,9 @@
         let globalHistory = []; // تخزين تاريخ الإعلانات
         let totalUsed = 0;      // إجمالي المبلغ المستخدم في الإعلانات
         let totalWithdrawn = 0; // إجمالي المسحوب الناجح
+
+        // متغير لتخزين نسبة العمولة
+        let commissionRate = 0.2; // النسبة المئوية
         
         // جلب سعر الدولار بالجنيه من API خارجي
         async function fetchUSDRate() {
@@ -1496,26 +1529,111 @@
             }
             
             updateWithdrawDisplay();
+            calculateCommission(); // تحديث تفاصيل العمولة عند تغيير الطريقة
         }
         
-        // دالة السحب: يتم خصم المبلغ فوراً وتحديث جميع الشاشات
+        // دالة حساب العمولة وعرض التفاصيل
+        function calculateCommission() {
+            let amountInput, amountInEGP, netAmount, commissionAmount, detailsDiv;
+            if (currentWithdrawMethod === 'vfcash') {
+                amountInput = document.getElementById('withdraw_amount_vfcash');
+                detailsDiv = document.getElementById('commission-details');
+                if (!amountInput || !detailsDiv) return;
+                let amount = parseFloat(amountInput.value);
+                if (isNaN(amount) || amount <= 0) {
+                    detailsDiv.innerHTML = '';
+                    return;
+                }
+                // التحقق من أن المبلغ لا يتجاوز الرصيد
+                if (amount > currentBalanceEGP) {
+                    detailsDiv.innerHTML = `<span style="color: red;">⚠️ المبلغ المطلوب أكبر من الرصيد المتاح (${currentBalanceEGP.toFixed(2)} EGP)</span>`;
+                    return;
+                }
+                amountInEGP = amount;
+                commissionAmount = amountInEGP * (commissionRate / 100);
+                netAmount = amountInEGP - commissionAmount;
+                // تقريب المبلغ النهائي لأسفل (بدون كسور) للسحب بالجنيه
+                netAmount = Math.floor(netAmount);
+                commissionAmount = amountInEGP - netAmount;
+                detailsDiv.innerHTML = `
+                    <div>المبلغ المطلوب: <span>${amountInEGP.toFixed(2)} EGP</span></div>
+                    <div>العمولة (${commissionRate}%): <span>${commissionAmount.toFixed(2)} EGP</span></div>
+                    <div>المبلغ الذي ستستلمه: <span>${netAmount.toFixed(2)} EGP</span></div>
+                    <div style="font-size: 11px; margin-top: 5px;"><i class="fa-solid fa-info-circle"></i> يتم خصم العمولة تلقائياً عند السحب</div>
+                `;
+            } else if (currentWithdrawMethod === 'binance') {
+                amountInput = document.getElementById('withdraw_amount_binance');
+                detailsDiv = document.getElementById('commission-details-binance');
+                if (!amountInput || !detailsDiv) return;
+                let amountUSDT = parseFloat(amountInput.value);
+                if (isNaN(amountUSDT) || amountUSDT <= 0) {
+                    detailsDiv.innerHTML = '';
+                    return;
+                }
+                amountInEGP = amountUSDT * exchangeRates.usdt_to_egp;
+                if (amountInEGP > currentBalanceEGP) {
+                    detailsDiv.innerHTML = `<span style="color: red;">⚠️ المبلغ المطلوب أكبر من الرصيد المتاح (${currentBalanceEGP.toFixed(2)} EGP)</span>`;
+                    return;
+                }
+                commissionAmount = amountInEGP * (commissionRate / 100);
+                let netEGP = amountInEGP - commissionAmount;
+                let netUSDT = netEGP / exchangeRates.usdt_to_egp;
+                detailsDiv.innerHTML = `
+                    <div>المبلغ المطلوب: <span>${amountUSDT.toFixed(4)} USDT</span> (~${amountInEGP.toFixed(2)} EGP)</div>
+                    <div>العمولة (${commissionRate}%): <span>${commissionAmount.toFixed(2)} EGP</span></div>
+                    <div>المبلغ الذي ستستلمه: <span>${netUSDT.toFixed(4)} USDT</span> (~${netEGP.toFixed(2)} EGP)</div>
+                    <div style="font-size: 11px; margin-top: 5px;"><i class="fa-solid fa-info-circle"></i> يتم خصم العمولة تلقائياً عند السحب</div>
+                `;
+            } else if (currentWithdrawMethod === 'ton') {
+                amountInput = document.getElementById('withdraw_amount_ton');
+                detailsDiv = document.getElementById('commission-details-ton');
+                if (!amountInput || !detailsDiv) return;
+                let amountTON = parseFloat(amountInput.value);
+                if (isNaN(amountTON) || amountTON <= 0) {
+                    detailsDiv.innerHTML = '';
+                    return;
+                }
+                amountInEGP = amountTON * exchangeRates.ton_to_egp;
+                if (amountInEGP > currentBalanceEGP) {
+                    detailsDiv.innerHTML = `<span style="color: red;">⚠️ المبلغ المطلوب أكبر من الرصيد المتاح (${currentBalanceEGP.toFixed(2)} EGP)</span>`;
+                    return;
+                }
+                commissionAmount = amountInEGP * (commissionRate / 100);
+                let netEGP = amountInEGP - commissionAmount;
+                let netTON = netEGP / exchangeRates.ton_to_egp;
+                detailsDiv.innerHTML = `
+                    <div>المبلغ المطلوب: <span>${amountTON.toFixed(4)} TON</span> (~${amountInEGP.toFixed(2)} EGP)</div>
+                    <div>العمولة (${commissionRate}%): <span>${commissionAmount.toFixed(2)} EGP</span></div>
+                    <div>المبلغ الذي ستستلمه: <span>${netTON.toFixed(4)} TON</span> (~${netEGP.toFixed(2)} EGP)</div>
+                    <div style="font-size: 11px; margin-top: 5px;"><i class="fa-solid fa-info-circle"></i> يتم خصم العمولة تلقائياً عند السحب</div>
+                `;
+            }
+        }
+        
+        // دالة السحب: يتم خصم المبلغ فوراً وتحديث جميع الشاشات مع تطبيق العمولة
         function submitWithdraw() {
             let amount = 0;
             let receiver = "";
             let currency = "";
             let amountInEGP = 0;
+            let commissionAmount = 0;
+            let netAmount = 0;
             
             if (currentWithdrawMethod === "vfcash") {
                 receiver = document.getElementById("withdraw_phone").value;
                 amount = parseFloat(document.getElementById("withdraw_amount_vfcash").value);
                 currency = "EGP";
-                amountInEGP = amount;
                 if (!receiver) { tg.showAlert("⚠️ يرجى إدخال رقم فودافون كاش!"); return; }
                 if (!amount || amount <= 0) { tg.showAlert("⚠️ يرجى إدخال مبلغ صحيح أكبر من صفر!"); return; }
-                if (amount > currentBalanceEGP) {
+                amountInEGP = amount;
+                if (amountInEGP > currentBalanceEGP) {
                     tg.showAlert(`⚠️ عذراً، رصيدك الحالي ${currentBalanceEGP.toFixed(2)} EGP لا يكفي للسحب!`);
                     return;
                 }
+                commissionAmount = amountInEGP * (commissionRate / 100);
+                netAmount = amountInEGP - commissionAmount;
+                netAmount = Math.floor(netAmount); // تقريب لأسفل للسحب بالجنيه
+                commissionAmount = amountInEGP - netAmount; // إعادة حساب العمولة بناءً على المبلغ النهائي
             } else if (currentWithdrawMethod === "binance") {
                 receiver = document.getElementById("withdraw_binance_id").value;
                 amount = parseFloat(document.getElementById("withdraw_amount_binance").value);
@@ -1528,6 +1646,12 @@
                     tg.showAlert(`⚠️ عذراً، الحد الأقصى المتاح للسحب هو ${maxUSDT.toFixed(4)} USDT`);
                     return;
                 }
+                commissionAmount = amountInEGP * (commissionRate / 100);
+                netAmount = amountInEGP - commissionAmount;
+                // تحويل المبلغ النهائي إلى USDT
+                let netUSDT = netAmount / exchangeRates.usdt_to_egp;
+                // سيتم إرسال netUSDT إلى المستخدم
+                amount = netUSDT; // نعدل المبلغ المرسل في الطلب
             } else if (currentWithdrawMethod === "ton") {
                 receiver = document.getElementById("withdraw_ton_address").value;
                 amount = parseFloat(document.getElementById("withdraw_amount_ton").value);
@@ -1540,9 +1664,13 @@
                     tg.showAlert(`⚠️ عذراً، الحد الأقصى المتاح للسحب هو ${maxTON.toFixed(6)} TON`);
                     return;
                 }
+                commissionAmount = amountInEGP * (commissionRate / 100);
+                netAmount = amountInEGP - commissionAmount;
+                let netTON = netAmount / exchangeRates.ton_to_egp;
+                amount = netTON; // تعديل المبلغ المرسل
             }
             
-            // خصم المبلغ من الرصيد فوراً
+            // خصم المبلغ من الرصيد (المبلغ الأصلي بالجنيه قبل العمولة)
             const oldBalance = currentBalanceEGP;
             currentBalanceEGP -= amountInEGP;
             if (currentBalanceEGP < 0) currentBalanceEGP = 0;
@@ -1550,15 +1678,17 @@
             // تحديث جميع الشاشات التي تعرض الرصيد
             updateAllBalances();
             
-            // إضافة طلب السحب إلى قائمة المعلقة
+            // إضافة طلب السحب إلى قائمة المعلقة مع حفظ تفاصيل العمولة
             const newWithdrawRequest = {
                 id: Date.now(),
-                amount: amount,
+                amount: amount, // المبلغ بعد العمولة بالعملة المطلوبة
                 currency: currency,
                 method: currentWithdrawMethod,
                 receiver: receiver,
                 date: new Date().toLocaleDateString('ar-EG') + ' ' + new Date().toLocaleTimeString('ar-EG'),
-                amount_egp: amountInEGP
+                amount_egp: netAmount, // المبلغ الذي سيصله بالجنيه (بعد العمولة)
+                original_amount_egp: amountInEGP, // المبلغ قبل العمولة
+                commission: commissionAmount
             };
             pendingWithdrawals.unshift(newWithdrawRequest);
             renderWithdrawalRequests();
@@ -1567,7 +1697,9 @@
                 action: "withdraw", 
                 amount: amount, 
                 currency: currency,
-                amount_egp: amountInEGP,
+                amount_egp: netAmount,
+                original_amount_egp: amountInEGP,
+                commission: commissionAmount,
                 method: currentWithdrawMethod, 
                 receiver: receiver,
                 user_id: globalUserId,
@@ -1576,7 +1708,12 @@
                 exchange_rates: exchangeRates
             }));
             
-            tg.showAlert(`✅ تم خصم ${amountInEGP.toFixed(2)} EGP من رصيدك\n📝 تم إرسال طلب السحب للمشرفين\n💰 الرصيد المتبقي: ${currentBalanceEGP.toFixed(2)} EGP`);
+            let msg = `✅ تم خصم ${amountInEGP.toFixed(2)} EGP من رصيدك\n`;
+            msg += `💰 العمولة (${commissionRate}%): ${commissionAmount.toFixed(2)} EGP\n`;
+            msg += `📦 المبلغ الذي ستستلمه: ${amount} ${currency}\n`;
+            msg += `📝 تم إرسال طلب السحب للمشرفين\n`;
+            msg += `💵 الرصيد المتبقي: ${currentBalanceEGP.toFixed(2)} EGP`;
+            tg.showAlert(msg);
             tg.close();
         }
         
@@ -1640,7 +1777,8 @@
                     amount_egp: w.amount_egp,
                     date: w.completed_date || w.date,
                     details: w.receiver ? `إلى: ${w.receiver}` : '',
-                    status: 'success'
+                    status: 'success',
+                    commission: w.commission
                 });
             });
             
@@ -1675,6 +1813,7 @@
                         <span>${t.details}</span>
                         <span><i class="fa-regular fa-calendar"></i> ${t.date}</span>
                     </div>
+                    ${t.commission ? `<div style="font-size: 11px; color: var(--warning); margin-top: 5px;">عمولة: ${t.commission.toFixed(2)} EGP</div>` : ''}
                     <div style="font-size: 11px; color: var(--success); margin-top: 8px;"><i class="fa-solid fa-check-circle"></i> مكتملة</div>
                 </div>
             `).join('');
@@ -1697,6 +1836,7 @@
                             <span><i class="fa-regular fa-user"></i> ${w.receiver || '---'}</span>
                             <span><i class="fa-regular fa-calendar"></i> ${w.date || new Date().toLocaleDateString('ar-EG')}</span>
                         </div>
+                        ${w.commission ? `<div style="font-size: 11px; color: var(--warning); margin-top: 5px;">عمولة: ${w.commission.toFixed(2)} EGP</div>` : ''}
                         <div style="font-size: 11px; color: var(--warning); margin-top: 8px;"><i class="fa-solid fa-spinner"></i> بانتظار موافقة المشرف</div>
                     </div>
                 `).join('');
@@ -1715,6 +1855,7 @@
                             <span><i class="fa-regular fa-user"></i> ${w.receiver || '---'}</span>
                             <span><i class="fa-regular fa-clock"></i> ${w.completed_date || w.date || 'تم التنفيذ'}</span>
                         </div>
+                        ${w.commission ? `<div style="font-size: 11px; color: var(--warning); margin-top: 5px;">عمولة: ${w.commission.toFixed(2)} EGP</div>` : ''}
                         <div style="font-size: 11px; color: var(--success); margin-top: 8px;"><i class="fa-solid fa-check-circle"></i> تمت بنجاح</div>
                     </div>
                 `).join('');
@@ -1928,6 +2069,8 @@
             if (user === 'mazen' && pass === '292002') {
                 closeAdminModal(); tg.showAlert("✅ أهلاً بك يا مالك النظام!");
                 document.getElementById('nav-admin').style.display = 'block'; switchTab('admin');
+                // تحميل نسبة العمولة الحالية من الخادم
+                fetchCommissionRate();
             } else { tg.showAlert("❌ بيانات الدخول خاطئة!"); }
         }
 
@@ -1984,11 +2127,34 @@
             tg.close();
         }
 
+        // وظيفة تعديل نسبة العمولة من لوحة الإدارة
+        function setCommissionRate() {
+            let rate = document.getElementById('commission_rate').value;
+            if (!rate || rate <= 0) { tg.showAlert("⚠️ يرجى إدخال نسبة صحيحة!"); return; }
+            tg.sendData(JSON.stringify({ action: "admin_set_commission", rate: parseFloat(rate) }));
+            tg.close();
+        }
+
+        // استدعاء نسبة العمولة الحالية من الخادم (سيتم تمريرها عبر URL)
+        function fetchCommissionRate() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let rate = urlParams.get('commission_rate');
+            if (rate) {
+                commissionRate = parseFloat(rate);
+                document.getElementById('current-commission-display').innerText = commissionRate;
+                document.getElementById('commission_rate').value = commissionRate;
+            }
+        }
+
         async function initProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             globalUserId = tg.initDataUnsafe?.user?.id || urlParams.get('user_id') || '123456789';
             const rawBalance = urlParams.get('balance') || '0';
             currentBalanceEGP = parseFloat(rawBalance);
+            
+            // جلب نسبة العمولة من الـ URL
+            let comm = urlParams.get('commission_rate');
+            if (comm) commissionRate = parseFloat(comm);
             
             await fetchExchangeRates();
             updateAllBalances();
@@ -2084,6 +2250,9 @@
             
             // تحديث تفاصيل المستخدم في قسم الطبقات
             updateUserStatsDisplay();
+            // عرض نسبة العمولة الحالية في لوحة الإدارة
+            document.getElementById('current-commission-display').innerText = commissionRate;
+            document.getElementById('commission_rate').value = commissionRate;
         }
         
         // دعم السحب لليسار لفتح الشريط الجانبي
@@ -2106,4 +2275,4 @@
         }, 300000);
     </script>
 </body>
-    </html>
+                </html>
