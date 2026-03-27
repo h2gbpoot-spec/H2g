@@ -1144,7 +1144,7 @@
         tg.expand();
         let globalUserId = "";
         let currentWithdrawMethod = 'vfcash';
-        let currentBalanceEGP = 0;
+        let currentBalanceEGP = 0; // الرصيد يبدأ من 0
         let currentPayment = 'vfcash';
         
         let exchangeRates = {
@@ -1152,6 +1152,7 @@
             ton_to_egp: 185
         };
         
+        // مصفوفات الطلبات فارغة تماماً بدون بيانات وهمية
         let pendingWithdrawals = [];
         let successWithdrawals = [];
         
@@ -1591,7 +1592,7 @@
                 return;
             }
             
-            if (!sender || sender === "حدث خطأ في تحميل الـ ID") {
+            if (!sender) {
                 tg.showAlert("⚠️ لم يتم التعرف على الـ ID الخاص بك!");
                 return;
             }
@@ -1701,7 +1702,8 @@
         async function initProfile() {
             const urlParams = new URLSearchParams(window.location.search);
             globalUserId = tg.initDataUnsafe?.user?.id || urlParams.get('user_id') || '123456789';
-            const rawBalance = urlParams.get('balance') || '1250.50';
+            // الرصيد يبدأ من 0 إذا لم يتم تمريره من البوت
+            const rawBalance = urlParams.get('balance') || '0';
             currentBalanceEGP = parseFloat(rawBalance);
             
             await fetchExchangeRates();
@@ -1710,27 +1712,24 @@
             let urlName = urlParams.get('name');
             let urlUser = urlParams.get('username');
             let urlPhoto = urlParams.get('photo');
-            let realUsers = urlParams.get('stats_users') || '1250';
-            let totalOperations = urlParams.get('stats_ops') || '342';
-            let userAds = urlParams.get('user_ads') || '15';
+            let realUsers = urlParams.get('stats_users') || '0';
+            let totalOperations = urlParams.get('stats_ops') || '0';
+            let userAds = urlParams.get('user_ads') || '0';
             let urlHistory = urlParams.get('history');
             
+            // استقبال طلبات السحب من البوت (فارغة إذا لم يتم إرسالها)
             try {
                 let pendingRaw = urlParams.get('pending_withdrawals');
-                if(pendingRaw) pendingWithdrawals = JSON.parse(decodeURIComponent(pendingRaw));
-                else {
-                    pendingWithdrawals = [
-                        { id: 1, amount: 250, currency: "EGP", method: "vfcash", receiver: "01012345678", date: "2025-03-15" },
-                        { id: 2, amount: 45.5, currency: "USDT", method: "binance", receiver: "binanceID123", date: "2025-03-16" }
-                    ];
+                if(pendingRaw && pendingRaw !== '[]') {
+                    pendingWithdrawals = JSON.parse(decodeURIComponent(pendingRaw));
+                } else {
+                    pendingWithdrawals = [];
                 }
                 let successRaw = urlParams.get('success_withdrawals');
-                if(successRaw) successWithdrawals = JSON.parse(decodeURIComponent(successRaw));
-                else {
-                    successWithdrawals = [
-                        { id: 3, amount: 120, currency: "EGP", method: "vfcash", receiver: "01098765432", completed_date: "2025-03-10" },
-                        { id: 4, amount: 12.5, currency: "TON", method: "ton", receiver: "UQ...xyz", completed_date: "2025-03-12" }
-                    ];
+                if(successRaw && successRaw !== '[]') {
+                    successWithdrawals = JSON.parse(decodeURIComponent(successRaw));
+                } else {
+                    successWithdrawals = [];
                 }
             } catch(e) {
                 pendingWithdrawals = [];
@@ -1765,7 +1764,7 @@
                     photoElem.src = fallbackAvatar;
                 }
             } else {
-                document.getElementById('display-name').innerText = "مستخدم سوبر تون";
+                document.getElementById('display-name').innerText = "مستخدم";
             }
 
             if (document.getElementById('real-users-count') && realUsers) {
@@ -1777,7 +1776,7 @@
 
             updateUserRank(userAds);
 
-            if (urlHistory && urlHistory !== 'None') {
+            if (urlHistory && urlHistory !== 'None' && urlHistory !== '') {
                 try {
                     let parsedHistory = JSON.parse(decodeURIComponent(urlHistory));
                     renderAdHistory(parsedHistory);
@@ -1800,5 +1799,4 @@
         }, 300000);
     </script>
 </body>
-</html>
-```
+                    </html>
