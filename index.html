@@ -1172,25 +1172,25 @@
             }
         }
         
-        // جلب سعر التون من TonAPI (المنصة الرسمية لـ TON)
+        // جلب سعر التون من KuCoin (TON-USDT) وتحويله إلى جنيه مصري
         async function fetchTONRate() {
             try {
-                const response = await fetch('https://tonapi.io/v2/rates?tokens=ton&currencies=usd');
+                const response = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=TON-USDT');
                 if (response.ok) {
                     const data = await response.json();
-                    // الاستجابة تأتي بصيغة: { rates: { ton: { usd: { price: 5.23 } } } }
-                    if (data && data.rates && data.rates.ton && data.rates.ton.usd && data.rates.ton.usd.price) {
-                        const tonUsd = parseFloat(data.rates.ton.usd.price);
-                        exchangeRates.ton_to_egp = tonUsd * exchangeRates.usdt_to_egp;
-                        console.log(`TON Price from TonAPI: ${tonUsd} USD = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`);
+                    if (data && data.code === "200000" && data.data && data.data.price) {
+                        const tonUsdt = parseFloat(data.data.price);
+                        // تحويل من USDT إلى EGP باستخدام سعر الدولار المحدث
+                        exchangeRates.ton_to_egp = tonUsdt * exchangeRates.usdt_to_egp;
+                        console.log(`TON Price from KuCoin: ${tonUsdt} USDT = ${exchangeRates.ton_to_egp.toFixed(2)} EGP`);
                     } else {
-                        console.error('خطأ في استجابة TonAPI: تنسيق غير متوقع', data);
+                        console.error('خطأ في استجابة KuCoin (TON-USDT):', data);
                     }
                 } else {
-                    console.error('فشل الاتصال بـ TonAPI');
+                    console.error('فشل الاتصال بـ KuCoin لسعر TON-USDT');
                 }
             } catch (error) {
-                console.error('خطأ في جلب سعر التون من TonAPI:', error);
+                console.error('خطأ في جلب سعر التون من KuCoin (TON-USDT):', error);
             }
         }
         
